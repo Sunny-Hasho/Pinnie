@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using PinWin.Interop;
 
 namespace PinWin
 {
@@ -13,6 +14,10 @@ namespace PinWin
         }
 
         public IntPtr Handle { get; private set; }
+
+        // Cache for optimization
+        public double CachedDpiScale { get; set; } = 1.0;
+        public Win32.RECT CachedFrameOffset { get; set; } // Left/Top/Right/Bottom diffs
 
         protected override void OnSourceInitialized(System.EventArgs e)
         {

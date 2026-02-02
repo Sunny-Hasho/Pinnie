@@ -226,44 +226,70 @@ namespace PinWin.Services
             {
                 overlay.Visibility = System.Windows.Visibility.Visible;
             }
+
+            // --- CACHING LOGIC START ---
+            // 1. DPI
+            int dpi = Win32.GetDpiForWindow(hwnd);
+            if (dpi == 0) dpi = 96;
+            overlay.CachedDpiScale = dpi / 96.0;
+
+            // 2. Frame Offset (Visual Bounds vs Window Rect)
+            // We need both rectangles to calculate the diff.
+            Win32.RECT visualRect;
+            int result = Win32.DwmGetWindowAttribute(hwnd, Win32.DWMWA_EXTENDED_FRAME_BOUNDS, out visualRect, Marshal.SizeOf(typeof(Win32.RECT)));
+            
+            // If DWM fails, we default to 0 offset (assume match)
+            if (result == 0)
+            {
+                Win32.RECT winRect;
+                if (Win32.GetWindowRect(hwnd, out winRect))
+                {
+                    var offset = new Win32.RECT();
+                    offset.Left = visualRect.Left - winRect.Left;
+                    offset.Top = visualRect.Top - winRect.Top;
+                    offset.Right = visualRect.Right - winRect.Right; 
+                    offset.Bottom = visualRect.Bottom - winRect.Bottom;
+                    overlay.CachedFrameOffset = offset;
+                }
+            }
+            // --- CACHING LOGIC END ---
         }
 
         private void UpdateOverlayPositionFast(IntPtr hwnd, OverlayWindow overlay)
         {
             if (hwnd == IntPtr.Zero) return; // Safety check
 
-            Win32.RECT rect;
-            // Try getting visual bounds (Windows Vista+)
-            // This call is relatively fast.
-            int result = Win32.DwmGetWindowAttribute(hwnd, Win32.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, System.Runtime.InteropServices.Marshal.SizeOf(typeof(Win32.RECT)));
+            // FASTEST PATH: Use GetWindowRect (User32) + Cached Offset
+            // This avoids DwmGetWindowAttribute (IPC) and GetDpi in the hot path.
             
-            if (result != 0)
+            Win32.RECT winRect;
+            if (!Win32.GetWindowRect(hwnd, out winRect))
             {
-                 // Fallback logic could go here but skipping for speed in Fast Path.
-                 // If DWM fails, we probably shouldn't be drawing an overlay anyway or it's closing.
-                 return;
+                return;
             }
 
-            int width = rect.Right - rect.Left;
-            int height = rect.Bottom - rect.Top;
+            // Apply Cached Offsets to get Visual Bounds
+            var offset = overlay.CachedFrameOffset;
+            int left = winRect.Left + offset.Left;
+            int top = winRect.Top + offset.Top;
+            int right = winRect.Right + offset.Right;   // Note: Cached Right is diff of Right coordinates
+            int bottom = winRect.Bottom + offset.Bottom;
+
+            int width = right - left;
+            int height = bottom - top;
 
             if (width <= 0 || height <= 0)
             {
-                return; // Don't hide/show, just do nothing
+                return;
             }
 
-            int finalTop = rect.Top;
+            int finalTop = top;
             int finalHeight = height;
             
-            // Calculate scale based on DPI - FAST enough
-            int dpi = Win32.GetDpiForWindow(hwnd);
-            if (dpi == 0) dpi = 96;
-            double scale = dpi / 96.0;
+            // Use Cached DPI
+            double scale = overlay.CachedDpiScale;
             
-            // Calculate offset based on CURRENT visibility state (set by Slow Timer)
-            // We assume PetIcon visibility state is up to date from the timer tick.
-            // If the user maximizes, the timer will catch it in ~50ms and hide the pet.
-            // For dragging/resizing, the state rarely changes effectively.
+            // Calculate offset based on CURRENT visibility state
             if (overlay.PetIcon.Visibility == System.Windows.Visibility.Visible)
             {
                 int petOffset = (int)Math.Ceiling(CurrentPetIconSize * scale);
@@ -271,10 +297,9 @@ namespace PinWin.Services
                 finalHeight += petOffset;
             }
 
-            // Direct Win32 positioning - CRITICAL to use SWP_NOCOPYBITS or similar if possible, 
-            // but standard flags are usually fine.
+            // Direct Win32 positioning
             Win32.SetWindowPos(overlay.Handle, IntPtr.Zero, 
-                rect.Left, finalTop, width, finalHeight, 
+                left, finalTop, width, finalHeight, 
                 Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE | Win32.SWP_SHOWWINDOW);
         }
 
