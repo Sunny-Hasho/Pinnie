@@ -11,6 +11,7 @@ namespace PinWin.ViewModels
         private readonly HotkeyService _hotkeyService;
         private readonly TrayService _trayService;
         private readonly OverlayService _overlayService;
+        private readonly SoundService _soundService;
         private IntPtr _mainWindowHandle;
         private IntPtr _lastToggledWindow = IntPtr.Zero; // Sticky target for hotkey
 
@@ -20,6 +21,7 @@ namespace PinWin.ViewModels
             _hotkeyService = new HotkeyService();
             _trayService = new TrayService();
             _overlayService = new OverlayService();
+            _soundService = new SoundService();
 
             _trayService.Initialize();
 
@@ -116,12 +118,14 @@ namespace PinWin.ViewModels
                 Logger.Log("AppViewModel: Adding overlay");
                 IntPtr overlayHandle = _overlayService.AddOverlay(handle);
                 _pinService.RegisterOverlay(handle, overlayHandle);
+                _soundService.PlayPinSound();
             }
             else
             {
                 Logger.Log("AppViewModel: Removing overlay");
                 _overlayService.RemoveOverlay(handle);
                 _pinService.UnregisterOverlay(handle);
+                _soundService.PlayUnpinSound();
             }
         }
 
