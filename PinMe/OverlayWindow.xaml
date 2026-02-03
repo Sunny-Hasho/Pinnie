@@ -10,7 +10,7 @@
         ResizeMode="NoResize"
         IsHitTestVisible="False"
         Focusable="False"
-        Opacity="0.8"
+        Opacity="1.0"
         Visibility="Hidden"
         SnapsToDevicePixels="True"
         UseLayoutRounding="True"
