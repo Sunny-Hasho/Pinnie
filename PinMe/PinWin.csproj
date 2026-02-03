@@ -17,4 +17,15 @@
     <RepositoryUrl>https://github.com/your-username/PinMe</RepositoryUrl>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\Orange-Car.gif" />
+    <None Include="Assets\mixkit-gear-fast-lock-tap-2857.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
+  </ItemGroup>
+
 </Project>

@@ -9,24 +9,21 @@ namespace PinWin.Services
         private List<IntPtr> _pinnedStack = new List<IntPtr>();
 
         // Returns true if pinned (TopMost), false if unpinned (NotTopMost)
+        // Returns true if pinned (TopMost), false if unpinned (NotTopMost)
         public bool TogglePin(IntPtr hWnd)
         {
             if (hWnd == IntPtr.Zero) return false;
 
-            bool isTopMost = IsWindowTopMost(hWnd);
-            Logger.Log($"TogglePin: HWND {hWnd}, IsTopMost: {isTopMost}");
-
-            if (isTopMost)
+            // Use internal state first. "Spamming" protection.
+            if (_pinnedStack.Contains(hWnd))
             {
                 UnpinWindow(hWnd);
-                // Verify it actually unpinned
-                return IsWindowTopMost(hWnd); 
+                return false; // Result is unpinned
             }
             else
             {
                 PinWindow(hWnd);
-                // Verify it actually pinned
-                return IsWindowTopMost(hWnd);
+                return true; // Result is pinned
             }
         }
 

@@ -10,6 +10,35 @@
         ResizeMode="NoResize"
         IsHitTestVisible="False"
         Focusable="False"
-        Opacity="0.8">
-    <Border BorderBrush="White" BorderThickness="4" Background="Transparent" />
+        Opacity="0.8"
+        Visibility="Hidden"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="HeaderRow" Height="150" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Image x:Name="PetIcon" 
+               Grid.Row="0" 
+               gif:ImageBehavior.AnimatedSource="/Assets/Orange-Car.gif" 
+               Height="30"
+               VerticalAlignment="Bottom"
+               HorizontalAlignment="Left" 
+               Margin="4,0,0,0" 
+               Panel.ZIndex="10" 
+               Visibility="Collapsed" 
+               RenderTransformOrigin="0.5,0.5">
+            <Image.RenderTransform>
+                <TranslateTransform x:Name="PetIconTransform" Y="8" />
+            </Image.RenderTransform>
+            <Image.Effect>
+                <DropShadowEffect ShadowDepth="2" BlurRadius="2" Opacity="0.5"/>
+            </Image.Effect>
+        </Image>
+
+        <Border x:Name="MainBorder" Grid.Row="1" BorderBrush="White" BorderThickness="4" Background="Transparent" />
+    </Grid>
 </Window>

@@ -6,80 +6,108 @@ namespace PinWin.Services
 {
     public class TrayService : IDisposable
     {
-        private NotifyIcon _notifyIcon;
-        private ContextMenuStrip _contextMenu;
+        private NotifyIcon? _notifyIcon;
+        private TrayMenu? _trayMenu;
         
         // Changed to use IntPtr for specific window
-        public event EventHandler<IntPtr> PinWindowRequested;
-        public event EventHandler UnpinRequested; // Keep generic unpin active for now or use same event?
-        public event EventHandler ExitRequested;
+        public event EventHandler<IntPtr>? PinWindowRequested;
+        public event EventHandler? UnpinRequested; // Keep generic unpin active for now or use same event?
+        public event EventHandler? ExitRequested;
+        public event EventHandler<bool>? ShowPetIconChanged;
+        public event EventHandler<bool>? ShowBorderChanged;
+        public event EventHandler<int>? BorderThicknessChanged;
+        public event EventHandler<int>? BorderRadiusChanged;
+        public event EventHandler<System.Windows.Media.Brush>? BorderColorChanged;
+        public event EventHandler<string>? PetIconChanged;
+        public event EventHandler<int>? PetIconSizeChanged;
+        public event EventHandler<string>? IconPositionChanged;
+        
+        public bool ShowPetIcon { get; set; } = true;
+        public bool ShowBorder { get; set; } = true;
 
         public void Initialize()
         {
-            _contextMenu = new ContextMenuStrip();
-            _contextMenu.Opening += ContextMenu_Opening;
-
-            _contextMenu.Items.Add("Pin Active Window (Hotkey preferred)", null, (s, e) => PinWindowRequested?.Invoke(this, Win32.GetForegroundWindow())); // Still broken for tray clicks usually
-            _contextMenu.Items.Add("-");
-            // Dynamic list will be added here
-            _contextMenu.Items.Add("Exit", null, (s, e) => ExitRequested?.Invoke(this, EventArgs.Empty));
+            _trayMenu = new TrayMenu();
+            _trayMenu.SetStates(ShowPetIcon, ShowBorder);
+            
+            // Wire up events
+            _trayMenu.ShowPetIconToggleClicked += (s, enabled) =>
+            {
+                ShowPetIcon = enabled;
+                ShowPetIconChanged?.Invoke(this, enabled);
+            };
+            
+            _trayMenu.ShowBorderToggleClicked += (s, enabled) =>
+            {
+                ShowBorder = enabled;
+                ShowBorderChanged?.Invoke(this, enabled);
+            };
+            
+            _trayMenu.ChangeIconClicked += (s, e) =>
+            {
+                using (var openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.gif;*.bmp|All Files|*.*";
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        PetIconChanged?.Invoke(this, openFileDialog.FileName);
+                    }
+                }
+            };
+            
+            _trayMenu.IconSizeChanged += (s, size) =>
+            {
+                PetIconSizeChanged?.Invoke(this, size);
+            };
+            
+            _trayMenu.IconPositionChanged += (s, position) =>
+            {
+                IconPositionChanged?.Invoke(this, position);
+            };
+            
+            _trayMenu.BorderThicknessChanged += (s, thickness) =>
+            {
+                BorderThicknessChanged?.Invoke(this, thickness);
+            };
+            
+            _trayMenu.BorderRadiusChanged += (s, radius) =>
+            {
+                BorderRadiusChanged?.Invoke(this, radius);
+            };
+            
+            _trayMenu.BorderColorChanged += (s, brush) =>
+            {
+                BorderColorChanged?.Invoke(this, brush);
+            };
+            
+            _trayMenu.ExitClicked += (s, e) => ExitRequested?.Invoke(this, EventArgs.Empty);
 
             _notifyIcon = new NotifyIcon
             {
                 Icon = System.Drawing.SystemIcons.Information, // Placeholder
                 Visible = true,
-                Text = "PinWin",
-                ContextMenuStrip = _contextMenu
+                Text = "PinWin"
             };
-        }
-
-        private void ContextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // Rebuild menu on open
-            _contextMenu.Items.Clear();
             
-            // "Pin Window" Submenu
-            var pinMenu = new ToolStripMenuItem("Pin Window...");
-            PopulateWindowList(pinMenu);
-            _contextMenu.Items.Add(pinMenu);
-
-            _contextMenu.Items.Add("-");
-            _contextMenu.Items.Add("Exit", null, (s, e) => ExitRequested?.Invoke(this, EventArgs.Empty));
+            _notifyIcon.MouseClick += NotifyIcon_MouseClick;
         }
 
-        private void PopulateWindowList(ToolStripMenuItem parent)
+        private void NotifyIcon_MouseClick(object? sender, MouseEventArgs e)
         {
-            Win32.EnumWindows((hwnd, lParam) =>
+            if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
             {
-                if (Win32.IsWindowVisible(hwnd))
+                if (_trayMenu != null && !_trayMenu.IsVisible)
                 {
-                    int length = Win32.GetWindowTextLength(hwnd);
-                    if (length > 0)
-                    {
-                        var sb = new System.Text.StringBuilder(length + 1);
-                        Win32.GetWindowText(hwnd, sb, sb.Capacity);
-                        string title = sb.ToString();
-
-                        // Filter out empty or self
-                        if (!string.IsNullOrWhiteSpace(title) && title != "PinWin" && title != "Program Manager")
-                        {
-                            parent.DropDownItems.Add(title, null, (s, e) => PinWindowRequested?.Invoke(this, hwnd));
-                        }
-                    }
+                    _trayMenu.SetStates(ShowPetIcon, ShowBorder);
+                    _trayMenu.ShowAtMouse();
                 }
-                return true;
-            }, IntPtr.Zero);
-            
-            if (parent.DropDownItems.Count == 0)
-            {
-                parent.DropDownItems.Add("(No visible windows found)");
             }
         }
 
         public void Dispose()
         {
             _notifyIcon?.Dispose();
-            _contextMenu?.Dispose();
+            _trayMenu?.Close();
         }
     }
 }
