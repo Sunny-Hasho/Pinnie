@@ -1,4 +1,4 @@
-# PinMe (PinWin) - Professional "Always On Top" Utility
+# PinMe - Professional "Always On Top" Utility
 
 **PinMe** is a robust, lightweight Windows utility designed for developers and power users. Unlike basic "always on top" scripts, PinMe offers **visual feedback**, **glitch-free handling**, and **smart window stacking**.
 
