@@ -13,7 +13,11 @@ namespace PinWin.ViewModels
         private readonly OverlayService _overlayService;
         private readonly SoundService _soundService;
         private IntPtr _mainWindowHandle;
-        private IntPtr _lastToggledWindow = IntPtr.Zero; // Sticky target for hotkey
+        private IntPtr _foregroundHook = IntPtr.Zero;
+        private Win32.WinEventDelegate _foregroundHookDelegate; // Keep ref to prevent GC
+        private IntPtr _currentForegroundWindow = IntPtr.Zero;
+        private IntPtr _pendingForegroundWindow = IntPtr.Zero;
+        private System.Windows.Threading.DispatcherTimer _focusDebounceTimer;
 
         public AppViewModel()
         {
@@ -23,20 +27,25 @@ namespace PinWin.ViewModels
             _overlayService = new OverlayService();
             _soundService = new SoundService();
 
+            // Initialize Focus Debounce Timer
+            _focusDebounceTimer = new System.Windows.Threading.DispatcherTimer();
+            _focusDebounceTimer.Interval = TimeSpan.FromMilliseconds(100); // 100ms delay to accept focus
+            _focusDebounceTimer.Tick += FocusDebounceTimer_Tick;
+
+            // Initialize Foreground Tracking Hook
+            _foregroundHookDelegate = new Win32.WinEventDelegate(ForegroundEventProc);
+            _foregroundHook = Win32.SetWinEventHook(
+                Win32.EVENT_SYSTEM_FOREGROUND, 
+                Win32.EVENT_SYSTEM_FOREGROUND, 
+                IntPtr.Zero, 
+                _foregroundHookDelegate, 
+                0, 0, 
+                Win32.WINEVENT_OUTOFCONTEXT);
+
             _trayService.Initialize();
 
             _trayService.ExitRequested += (s, e) => System.Windows.Application.Current.Shutdown();
             _trayService.PinWindowRequested += (s, hwnd) => TogglePinState(hwnd); 
-            // Tray specifically asked for "Pin" and "Unpin" separate items, but implementation plan said "Pin/Unpin".
-            // Let's use Toggle for simplicity or check foreground. 
-            // Tray context menu "Pin Active Window" implies pinning the window that was active before clicking the tray?
-            // Clicking tray makes tray/taskbar active. This is tricky.
-            // Usually tray tools work on "currently focused" but once you click tray, focus is lost.
-            // Solved by: GetForegroundWindow MIGHT be the tray/taskbar.
-            // However, Hotkey works perfectly for this. Tray menu items for "Pin Active" are hard to use unless there's a delay or selection mode.
-            // For MVP, hotkey is primary. Tray "Pin" might just toggle the *last* active window or just be there for show/help.
-            // Let's make Tray "Pin" trigger the same toggle on Foreground (which might be wrong window) but for now stick to HotkeyService mainly.
-            
             _trayService.ShowPetIconChanged += (s, enabled) => _overlayService.SetPetIconState(enabled);
             _trayService.ShowBorderChanged += (s, enabled) => _overlayService.SetBorderState(enabled);
             _trayService.BorderThicknessChanged += (s, thickness) => _overlayService.SetBorderThickness(thickness);
@@ -49,6 +58,35 @@ namespace PinWin.ViewModels
             _hotkeyService.HotkeyPressed += (s, e) => ToggleActiveWindowPin();
         }
 
+        private void ForegroundEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        {
+            if (eventType == Win32.EVENT_SYSTEM_FOREGROUND && hwnd != IntPtr.Zero)
+            {
+                // Normalize logic immediately
+                IntPtr rootWindow = Win32.GetAncestor(hwnd, Win32.GA_ROOTOWNER);
+                if (rootWindow != IntPtr.Zero)
+                {
+                    hwnd = rootWindow;
+                }
+                
+                // Start Debounce: Don't commit yet, wait 100ms to see if it settles
+                _pendingForegroundWindow = hwnd;
+                _focusDebounceTimer.Stop();
+                _focusDebounceTimer.Start();
+            }
+        }
+
+        private void FocusDebounceTimer_Tick(object sender, EventArgs e)
+        {
+            _focusDebounceTimer.Stop();
+            
+            if (_pendingForegroundWindow != IntPtr.Zero && _pendingForegroundWindow != _currentForegroundWindow)
+            {
+                Logger.Log($"ForegroundTracker: Stable Focus Changed to {_pendingForegroundWindow}");
+                _currentForegroundWindow = _pendingForegroundWindow;
+            }
+        }
+
         public void Initialize(IntPtr windowHandle)
         {
             _mainWindowHandle = windowHandle;
@@ -56,6 +94,9 @@ namespace PinWin.ViewModels
             {
                 System.Windows.MessageBox.Show("Failed to register hotkey (Ctrl + Win + T). It might be in use.", "PinWin Error");
             }
+            
+            // Seed initial state
+            _currentForegroundWindow = Win32.GetForegroundWindow();
         }
 
         public void ProcessMessage(int msg, IntPtr wParam)
@@ -65,8 +106,32 @@ namespace PinWin.ViewModels
 
         private void ToggleActiveWindowPin()
         {
-             IntPtr hwnd = Win32.GetForegroundWindow();
-             Logger.Log($"ToggleActiveWindowPin: GetForegroundWindow returned {hwnd}");
+             // NEW STRATEGY: Target the window under the mouse cursor.
+             // This solves "Active Window" ambiguity by relying on user's pointing intent.
+             
+             Win32.POINT cursor;
+             IntPtr hwnd = IntPtr.Zero;
+
+             if (Win32.GetCursorPos(out cursor))
+             {
+                 hwnd = Win32.WindowFromPoint(cursor);
+                 Logger.Log($"ToggleActiveWindowPin: Cursor at {cursor.X},{cursor.Y} -> HWND {hwnd}");
+             }
+             
+             if (hwnd == IntPtr.Zero)
+             {
+                 // Fallback to Foreground if mouse fails
+                 hwnd = Win32.GetForegroundWindow();
+                 Logger.Log($"ToggleActiveWindowPin: Cursor failed, falling back to Foreground HWND {hwnd}");
+             }
+
+             // Normalize logic: Get root owner to handle child windows/controls
+             IntPtr rootWindow = Win32.GetAncestor(hwnd, Win32.GA_ROOTOWNER);
+             if (rootWindow != IntPtr.Zero)
+             {
+                 Logger.Log($"ToggleActiveWindowPin: Normalized {hwnd} to root owner {rootWindow}");
+                 hwnd = rootWindow;
+             }
              
              // Check if the user has focused (or system thinks focused) the overlay
              if (_overlayService.TryGetTargetFromOverlay(hwnd, out var realTarget))
@@ -74,36 +139,18 @@ namespace PinWin.ViewModels
                  Logger.Log($"ToggleActiveWindowPin: Redirecting from Overlay {hwnd} to Target {realTarget}");
                  hwnd = realTarget;
              }
-             else
-             {
-                 Logger.Log($"ToggleActiveWindowPin: Window {hwnd} is not an overlay, using directly");
-             }
 
              IntPtr targetWindow = hwnd;
 
-             // Sticky target logic: If we have a last toggled window and it's still valid
-             if (_lastToggledWindow != IntPtr.Zero && Win32.IsWindow(_lastToggledWindow))
+             // Prioritize: If the target window is pinned, toggle it.
+             if (_pinService.IsPinned(hwnd))
              {
-                 // Only stick to the last window if it's STILL the foreground window
-                 // This prevents switching to random windows when focus briefly changes
-                 if (hwnd == _lastToggledWindow)
-                 {
-                     Logger.Log($"ToggleActiveWindowPin: Using sticky target {hwnd}");
-                     targetWindow = _lastToggledWindow;
-                 }
-                 else
-                 {
-                     // User explicitly switched to a different window
-                     Logger.Log($"ToggleActiveWindowPin: User switched from {_lastToggledWindow} to {hwnd}, updating target");
-                     _lastToggledWindow = hwnd;
-                     targetWindow = hwnd;
-                 }
+                 Logger.Log($"ToggleActiveWindowPin: Window {hwnd} is PINNED - will toggle (unpin) it");
+                 targetWindow = hwnd;
              }
              else
              {
-                 // First time or last window was closed
-                 Logger.Log($"ToggleActiveWindowPin: Setting initial target {hwnd}");
-                 _lastToggledWindow = hwnd;
+                 Logger.Log($"ToggleActiveWindowPin: Window {hwnd} is NOT PINNED - will pin it");
                  targetWindow = hwnd;
              }
 
@@ -133,15 +180,17 @@ namespace PinWin.ViewModels
 
         private void PinCurrentWindow()
         {
-            // For tray clicks, getting foreground window is unreliable (it's the menu).
-            // This is a known limitation. We'll skip complex logic for now or implement a timer-based selection if needed.
-            // or just ToggleActiveWindowPin() and accept it might try to pin the taskbar.
             ToggleActiveWindowPin(); 
         }
 
         public void Dispose()
         {
             _hotkeyService.Unregister(_mainWindowHandle);
+            if (_foregroundHook != IntPtr.Zero)
+            {
+                Win32.UnhookWinEvent(_foregroundHook);
+                _foregroundHook = IntPtr.Zero;
+            }
             _trayService.Dispose();
             _overlayService.Dispose();
         }

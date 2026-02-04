@@ -95,6 +95,15 @@ namespace PinWin.Interop
         [DllImport("user32.dll")]
         public static extern int GetDpiForWindow(IntPtr hWnd);
 
+        // GetAncestor - to get root window from child windows
+        public const int GA_ROOT = 2;
+        public const int GA_ROOTOWNER = 3;
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetAncestor(IntPtr hwnd, int gaFlags);
+
+        // DWM for Visual Bounds
+
         // DWM for Visual Bounds
         public const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
         public const int DWMWA_CLOAKED = 14;
@@ -161,13 +170,22 @@ namespace PinWin.Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool EndDeferWindowPos(IntPtr hWinPosInfo);
 
-        // Window Placement
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT
         {
             public int X;
             public int Y;
         }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetCursorPos(out POINT lpPoint);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr WindowFromPoint(POINT Point);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr ChildWindowFromPoint(IntPtr hWndParent, POINT Point);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct WINDOWPLACEMENT

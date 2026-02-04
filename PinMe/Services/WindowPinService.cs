@@ -27,6 +27,11 @@ namespace PinWin.Services
             }
         }
 
+        public bool IsPinned(IntPtr hWnd)
+        {
+            return _pinnedStack.Contains(hWnd);
+        }
+
         public bool IsWindowTopMost(IntPtr hWnd)
         {
             IntPtr exStyle = Win32.GetWindowLongPtr(hWnd, Win32.GWL_EXSTYLE);
