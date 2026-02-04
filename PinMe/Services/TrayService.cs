@@ -43,16 +43,11 @@ namespace PinWin.Services
                 ShowBorderChanged?.Invoke(this, enabled);
             };
             
-            _trayMenu.ChangeIconClicked += (s, e) =>
+            // Old ChangeIconClicked removed - replaced by internal SubMenu logic
+            
+            _trayMenu.PetIconChanged += (s, path) =>
             {
-                using (var openFileDialog = new OpenFileDialog())
-                {
-                    openFileDialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.gif;*.bmp|All Files|*.*";
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        PetIconChanged?.Invoke(this, openFileDialog.FileName);
-                    }
-                }
+                PetIconChanged?.Invoke(this, path);
             };
             
             _trayMenu.IconSizeChanged += (s, size) =>

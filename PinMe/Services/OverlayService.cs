@@ -23,6 +23,9 @@ namespace PinWin.Services
             _trackingTimer.Tick += TrackingTimer_Tick;
             _trackingTimer.Start();
 
+            // Set default icon to Capybara
+            CurrentPetIconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "capy.gif");
+
             // Hook animation events for seamless transitions
             _animationHookDelegate = new Win32.WinEventDelegate(AnimationEventProc);
             _animationHook = Win32.SetWinEventHook(
@@ -34,6 +37,8 @@ namespace PinWin.Services
                 0,
                 Win32.WINEVENT_OUTOFCONTEXT);
         }
+
+
 
         public IntPtr AddOverlay(IntPtr targetHwnd)
         {
@@ -118,7 +123,7 @@ namespace PinWin.Services
 
         public bool IsPetIconEnabled { get; set; } = true;
         public bool IsBorderEnabled { get; set; } = true;
-        public int CurrentBorderThickness { get; set; } = 4;
+        public int CurrentBorderThickness { get; set; } = 2; // Default: Small (2px)
         public int CurrentCornerRadius { get; set; } = 8; // Defaulting to 8px as requested
         public System.Windows.Media.Brush CurrentBorderBrush { get; set; } = System.Windows.Media.Brushes.White;
         public string? CurrentPetIconPath { get; set; }
@@ -301,9 +306,12 @@ namespace PinWin.Services
             int finalHeight = height;
 
             // 4. Update Header Height based on state
-            // If Maximized (showPet == false), collapse header to 0 to align border perfectly.
-            // If Restored (showPet == true), use FIXED 150px header to prevent resize glitches.
-            if (showPet)
+            // Decoupled from "Show Pet" flag to prevent glitches when toggling icon.
+            // If Maximized, collapse header to 0.
+            // If Restored, ALWAYS use 150px header for stability.
+            bool useFixedHeader = !isMaximized;
+            
+            if (useFixedHeader)
             {
                 overlay.SetHeaderHeight(150);
             }
@@ -330,8 +338,8 @@ namespace PinWin.Services
                 // Ignore errors
             }
 
-            // Fallback only if we EXPECT a header (showPet is true) but got 0
-            if (showPet && petOffset <= 0)
+            // Fallback: If we expect a Fixed Header but got 0/bad value
+            if (useFixedHeader && petOffset <= 0)
             {
                  int dpi = Win32.GetDpiForWindow(hwnd);
                  if (dpi == 0) dpi = 96;

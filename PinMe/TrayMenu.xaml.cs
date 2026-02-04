@@ -18,10 +18,13 @@ namespace PinWin
         public event EventHandler<System.Windows.Media.Brush>? BorderColorChanged;
         public event EventHandler? ExitClicked;
 
+        public event EventHandler<string>? PetIconChanged;
+
         private bool _showPetIcon = true;
         private bool _showBorder = true;
         private SubMenu? _iconSizeSubMenu;
         private SubMenu? _iconPositionSubMenu;
+        private SubMenu? _changeIconSubMenu; // New submenu for icons
         private SubMenu? _borderThicknessSubMenu;
         private SubMenu? _borderRadiusSubMenu;
         private ColorPickerPopup? _colorPickerPopup;
@@ -48,6 +51,42 @@ namespace PinWin
             _iconSizeSubMenu.ItemClicked += (s, value) =>
             {
                 IconSizeChanged?.Invoke(this, int.Parse(value));
+                HideAllSubMenus();
+            };
+
+            _iconSizeSubMenu.ItemClicked += (s, value) =>
+            {
+                IconSizeChanged?.Invoke(this, int.Parse(value));
+                HideAllSubMenus();
+            };
+
+            // Change Icon SubMenu
+            _changeIconSubMenu = new SubMenu();
+            _changeIconSubMenu.AddMenuItem("Capybara", "capy.gif");
+            _changeIconSubMenu.AddMenuItem("Cat", "cat.gif");
+            _changeIconSubMenu.AddMenuItem("Guinea Pig", "guinea.gif");
+            _changeIconSubMenu.AddMenuItem("Import Custom...", "import");
+            
+            _changeIconSubMenu.ItemClicked += (s, value) =>
+            {
+                if (value == "import")
+                {
+                    // Trigger import logic
+                    using (var openFileDialog = new OpenFileDialog())
+                    {
+                        openFileDialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.gif;*.bmp|All Files|*.*";
+                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        {
+                            PetIconChanged?.Invoke(this, openFileDialog.FileName);
+                        }
+                    }
+                }
+                else
+                {
+                    // Construct full path for presets
+                    string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", value);
+                    PetIconChanged?.Invoke(this, fullPath);
+                }
                 HideAllSubMenus();
             };
 
@@ -119,6 +158,7 @@ namespace PinWin
                                  (PinWin.Interop.Win32.GetAsyncKeyState(PinWin.Interop.Win32.VK_MBUTTON) & 0x8000) != 0;
 
             if (mouseButtonDown && !this.IsMouseOver && 
+                !(_changeIconSubMenu?.IsMouseOver ?? false) &&
                 !(_iconSizeSubMenu?.IsMouseOver ?? false) && 
                 !(_iconPositionSubMenu?.IsMouseOver ?? false) &&
                 !(_borderThicknessSubMenu?.IsMouseOver ?? false) &&
@@ -164,7 +204,8 @@ namespace PinWin
         private void Window_Deactivated(object sender, EventArgs e)
         {
             // Don't hide if a submenu or color picker is being shown
-            if (_iconSizeSubMenu?.IsVisible == true || _iconPositionSubMenu?.IsVisible == true ||
+            if (_changeIconSubMenu?.IsVisible == true ||
+                _iconSizeSubMenu?.IsVisible == true || _iconPositionSubMenu?.IsVisible == true ||
                 _borderThicknessSubMenu?.IsVisible == true || _borderRadiusSubMenu?.IsVisible == true || 
                 _colorPickerPopup?.IsVisible == true)
                 return;
@@ -174,6 +215,7 @@ namespace PinWin
 
         private void HideAllSubMenus()
         {
+            _changeIconSubMenu?.Hide();
             _iconSizeSubMenu?.Hide();
             _iconPositionSubMenu?.Hide();
             _borderThicknessSubMenu?.Hide();
@@ -206,8 +248,14 @@ namespace PinWin
 
         private void BtnChangeIcon_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
-            ChangeIconClicked?.Invoke(this, EventArgs.Empty);
+            HideAllSubMenus();
+            _changeIconSubMenu?.ShowNextTo(BtnChangeIcon, this);
+        }
+
+        private void BtnChangeIcon_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            HideAllSubMenus();
+            _changeIconSubMenu?.ShowNextTo(BtnChangeIcon, this);
         }
 
         private void BtnIconSize_Click(object sender, RoutedEventArgs e)

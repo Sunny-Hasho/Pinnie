@@ -1,0 +1,238 @@
+2/4/2026 3:57:39 PM: Startup registry key set to: C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 3:57:39 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\Wntk9N1Bx3vyPQVxkblX9f+LZZidBVE=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 3:57:41 PM: ForegroundTracker: Stable Focus Changed to 263752
+2/4/2026 3:57:43 PM: ForegroundTracker: Stable Focus Changed to 134028
+2/4/2026 3:57:46 PM: ToggleActiveWindowPin: Cursor at 1434,157 -> HWND 134132
+2/4/2026 3:57:46 PM: ToggleActiveWindowPin: Normalized 134132 to root owner 134028
+2/4/2026 3:57:46 PM: ToggleActiveWindowPin: Window 134028 is NOT PINNED - will pin it
+2/4/2026 3:57:46 PM: AppViewModel: Toggle request for 134028
+2/4/2026 3:57:46 PM: AppViewModel: Adding overlay
+2/4/2026 3:57:46 PM: OverlayService: Added overlay for 134028
+2/4/2026 3:57:46 PM: ForegroundTracker: Stable Focus Changed to 67508
+2/4/2026 3:57:47 PM: ToggleActiveWindowPin: Cursor at 1434,157 -> HWND 134132
+2/4/2026 3:57:47 PM: ToggleActiveWindowPin: Normalized 134132 to root owner 134028
+2/4/2026 3:57:47 PM: ToggleActiveWindowPin: Window 134028 is PINNED - will toggle (unpin) it
+2/4/2026 3:57:47 PM: AppViewModel: Toggle request for 134028
+2/4/2026 3:57:47 PM: UnpinWindow: HWND 134028
+2/4/2026 3:57:47 PM: AppViewModel: Removing overlay
+2/4/2026 3:57:47 PM: OverlayService: Removed overlay for 134028
+2/4/2026 3:58:06 PM: ForegroundTracker: Stable Focus Changed to 263752
+2/4/2026 3:58:08 PM: ForegroundTracker: Stable Focus Changed to 65978
+2/4/2026 3:58:08 PM: ForegroundTracker: Stable Focus Changed to 131744
+2/4/2026 3:58:09 PM: ForegroundTracker: Stable Focus Changed to 66200
+2/4/2026 4:03:57 PM: Startup registry key set to: C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 4:03:57 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\ie2DgSuioVRqPWzzsWN51S5Ly5SmxZo=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:04:04 PM: ForegroundTracker: Stable Focus Changed to 66922
+2/4/2026 4:04:05 PM: ForegroundTracker: Stable Focus Changed to 198488
+2/4/2026 4:04:05 PM: ForegroundTracker: Stable Focus Changed to 65976
+2/4/2026 4:04:05 PM: ForegroundTracker: Stable Focus Changed to 721250
+2/4/2026 4:04:07 PM: ForegroundTracker: Stable Focus Changed to 134242
+2/4/2026 4:04:09 PM: ToggleActiveWindowPin: Cursor at 1718,160 -> HWND 330878
+2/4/2026 4:04:09 PM: ToggleActiveWindowPin: Normalized 330878 to root owner 134242
+2/4/2026 4:04:09 PM: ToggleActiveWindowPin: Window 134242 is NOT PINNED - will pin it
+2/4/2026 4:04:09 PM: AppViewModel: Toggle request for 134242
+2/4/2026 4:04:09 PM: AppViewModel: Adding overlay
+2/4/2026 4:04:09 PM: OverlayService: Added overlay for 134242
+2/4/2026 4:04:09 PM: ForegroundTracker: Stable Focus Changed to 198488
+2/4/2026 4:04:10 PM: ToggleActiveWindowPin: Cursor at 1718,160 -> HWND 330878
+2/4/2026 4:04:10 PM: ToggleActiveWindowPin: Normalized 330878 to root owner 134242
+2/4/2026 4:04:10 PM: ToggleActiveWindowPin: Window 134242 is PINNED - will toggle (unpin) it
+2/4/2026 4:04:10 PM: AppViewModel: Toggle request for 134242
+2/4/2026 4:04:10 PM: UnpinWindow: HWND 134242
+2/4/2026 4:04:10 PM: AppViewModel: Removing overlay
+2/4/2026 4:04:10 PM: OverlayService: Removed overlay for 134242
+2/4/2026 4:04:12 PM: ForegroundTracker: Stable Focus Changed to 721250
+2/4/2026 4:04:13 PM: Startup registry key removed.
+2/4/2026 4:04:40 PM: Startup registry key set to: C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 4:04:40 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\ie2DgSuioVRqPWzzsWN51S5Ly5SmxZo=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:04:44 PM: ForegroundTracker: Stable Focus Changed to 134242
+2/4/2026 4:04:46 PM: ToggleActiveWindowPin: Cursor at 1653,183 -> HWND 330878
+2/4/2026 4:04:46 PM: ToggleActiveWindowPin: Normalized 330878 to root owner 134242
+2/4/2026 4:04:46 PM: ToggleActiveWindowPin: Window 134242 is NOT PINNED - will pin it
+2/4/2026 4:04:46 PM: AppViewModel: Toggle request for 134242
+2/4/2026 4:04:46 PM: AppViewModel: Adding overlay
+2/4/2026 4:04:46 PM: OverlayService: Added overlay for 134242
+2/4/2026 4:04:46 PM: ForegroundTracker: Stable Focus Changed to 198488
+2/4/2026 4:04:46 PM: ToggleActiveWindowPin: Cursor at 1653,183 -> HWND 330878
+2/4/2026 4:04:46 PM: ToggleActiveWindowPin: Normalized 330878 to root owner 134242
+2/4/2026 4:04:46 PM: ToggleActiveWindowPin: Window 134242 is PINNED - will toggle (unpin) it
+2/4/2026 4:04:46 PM: AppViewModel: Toggle request for 134242
+2/4/2026 4:04:46 PM: UnpinWindow: HWND 134242
+2/4/2026 4:04:46 PM: AppViewModel: Removing overlay
+2/4/2026 4:04:46 PM: OverlayService: Removed overlay for 134242
+2/4/2026 4:04:54 PM: ForegroundTracker: Stable Focus Changed to 721250
+2/4/2026 4:04:57 PM: ForegroundTracker: Stable Focus Changed to 131762
+2/4/2026 4:04:58 PM: ForegroundTracker: Stable Focus Changed to 66218
+2/4/2026 4:09:05 PM: Startup registry key set to: C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 4:09:05 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\ewYkAzlgdKK0xXw6Hx4VvDnsPcTeNVc=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:09:06 PM: ForegroundTracker: Stable Focus Changed to 65994
+2/4/2026 4:09:07 PM: ForegroundTracker: Stable Focus Changed to 197492
+2/4/2026 4:09:07 PM: ForegroundTracker: Stable Focus Changed to 655490
+2/4/2026 4:09:09 PM: ToggleActiveWindowPin: Cursor at 1494,320 -> HWND 396152
+2/4/2026 4:09:09 PM: ToggleActiveWindowPin: Normalized 396152 to root owner 655490
+2/4/2026 4:09:09 PM: ToggleActiveWindowPin: Window 655490 is NOT PINNED - will pin it
+2/4/2026 4:09:09 PM: AppViewModel: Toggle request for 655490
+2/4/2026 4:09:09 PM: AppViewModel: Adding overlay
+2/4/2026 4:09:09 PM: OverlayService: Added overlay for 655490
+2/4/2026 4:09:10 PM: ForegroundTracker: Stable Focus Changed to 67426
+2/4/2026 4:09:10 PM: ToggleActiveWindowPin: Cursor at 1494,320 -> HWND 396152
+2/4/2026 4:09:10 PM: ToggleActiveWindowPin: Normalized 396152 to root owner 655490
+2/4/2026 4:09:10 PM: ToggleActiveWindowPin: Window 655490 is PINNED - will toggle (unpin) it
+2/4/2026 4:09:10 PM: AppViewModel: Toggle request for 655490
+2/4/2026 4:09:10 PM: UnpinWindow: HWND 655490
+2/4/2026 4:09:10 PM: AppViewModel: Removing overlay
+2/4/2026 4:09:10 PM: OverlayService: Removed overlay for 655490
+2/4/2026 4:09:29 PM: ForegroundTracker: Stable Focus Changed to 197492
+2/4/2026 4:10:01 PM: ForegroundTracker: Stable Focus Changed to 196950
+2/4/2026 4:10:02 PM: ForegroundTracker: Stable Focus Changed to 66220
+2/4/2026 4:26:38 PM: Startup registry key set to: C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 4:26:38 PM: MainWindow: Constructor started
+2/4/2026 4:26:38 PM: MainWindow: InitializeComponent completed
+2/4/2026 4:26:38 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\4dHYyzfmEAetf5+mV3tOkp_W0Bi6Kdk=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:26:38 PM: MainWindow: AppViewModel created
+2/4/2026 4:26:38 PM: MainWindow: DataContext set
+2/4/2026 4:26:38 PM: MainWindow: OnSourceInitialized started
+2/4/2026 4:26:38 PM: MainWindow: ViewModel initialized
+2/4/2026 4:26:38 PM: MainWindow: HwndHook added - FULLY INITIALIZED
+2/4/2026 4:26:38 PM: MainWindow: HWND created
+2/4/2026 4:26:57 PM: ForegroundTracker: Stable Focus Changed to 66876
+2/4/2026 4:26:57 PM: ForegroundTracker: Stable Focus Changed to 917858
+2/4/2026 4:27:00 PM: ForegroundTracker: Stable Focus Changed to 329466
+2/4/2026 4:27:01 PM: ToggleActiveWindowPin: Cursor at 1833,300 -> HWND 132128
+2/4/2026 4:27:01 PM: ToggleActiveWindowPin: Normalized 132128 to root owner 329466
+2/4/2026 4:27:01 PM: ToggleActiveWindowPin: Window 329466 is NOT PINNED - will pin it
+2/4/2026 4:27:01 PM: AppViewModel: Toggle request for 329466
+2/4/2026 4:27:01 PM: AppViewModel: Adding overlay
+2/4/2026 4:27:01 PM: OverlayService: Added overlay for 329466
+2/4/2026 4:27:01 PM: ForegroundTracker: Stable Focus Changed to 722094
+2/4/2026 4:27:05 PM: ToggleActiveWindowPin: Cursor at 1686,198 -> HWND 459874
+2/4/2026 4:27:05 PM: ToggleActiveWindowPin: Normalized 459874 to root owner 329466
+2/4/2026 4:27:05 PM: ToggleActiveWindowPin: Window 329466 is PINNED - will toggle (unpin) it
+2/4/2026 4:27:05 PM: AppViewModel: Toggle request for 329466
+2/4/2026 4:27:05 PM: UnpinWindow: HWND 329466
+2/4/2026 4:27:05 PM: AppViewModel: Removing overlay
+2/4/2026 4:27:05 PM: OverlayService: Removed overlay for 329466
+2/4/2026 4:27:14 PM: ForegroundTracker: Stable Focus Changed to 67616
+2/4/2026 4:27:58 PM: ForegroundTracker: Stable Focus Changed to 131762
+2/4/2026 4:27:58 PM: ForegroundTracker: Stable Focus Changed to 66218
+2/4/2026 4:34:47 PM: Startup registry key set to: C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 4:34:48 PM: MainWindow: Constructor started
+2/4/2026 4:34:48 PM: MainWindow: InitializeComponent completed
+2/4/2026 4:34:48 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\fcAFSDYik6KEoqmws8NBia15A9qUeMA=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:34:48 PM: MainWindow: AppViewModel created
+2/4/2026 4:34:48 PM: MainWindow: DataContext set
+2/4/2026 4:34:48 PM: MainWindow: OnSourceInitialized started
+2/4/2026 4:34:48 PM: MainWindow: ViewModel initialized
+2/4/2026 4:34:48 PM: MainWindow: HwndHook added - FULLY INITIALIZED
+2/4/2026 4:34:48 PM: MainWindow: HWND created
+2/4/2026 4:34:48 PM: ForegroundTracker: Stable Focus Changed to 3542006
+2/4/2026 4:35:21 PM: ForegroundTracker: Stable Focus Changed to 65988
+2/4/2026 4:35:21 PM: ForegroundTracker: Stable Focus Changed to 197882
+2/4/2026 4:35:23 PM: ForegroundTracker: Stable Focus Changed to 198810
+2/4/2026 4:35:25 PM: ToggleActiveWindowPin: Cursor at 1654,232 -> HWND 198594
+2/4/2026 4:35:25 PM: ToggleActiveWindowPin: Normalized 198594 to root owner 198810
+2/4/2026 4:35:25 PM: ToggleActiveWindowPin: Window 198810 is NOT PINNED - will pin it
+2/4/2026 4:35:25 PM: AppViewModel: Toggle request for 198810
+2/4/2026 4:35:25 PM: AppViewModel: Adding overlay
+2/4/2026 4:35:25 PM: OverlayService: Added overlay for 198810
+2/4/2026 4:35:25 PM: ForegroundTracker: Stable Focus Changed to 67622
+2/4/2026 4:35:25 PM: ToggleActiveWindowPin: Cursor at 1654,232 -> HWND 198594
+2/4/2026 4:35:25 PM: ToggleActiveWindowPin: Normalized 198594 to root owner 198810
+2/4/2026 4:35:25 PM: ToggleActiveWindowPin: Window 198810 is PINNED - will toggle (unpin) it
+2/4/2026 4:35:25 PM: AppViewModel: Toggle request for 198810
+2/4/2026 4:35:25 PM: UnpinWindow: HWND 198810
+2/4/2026 4:35:25 PM: AppViewModel: Removing overlay
+2/4/2026 4:35:25 PM: OverlayService: Removed overlay for 198810
+2/4/2026 4:35:28 PM: ForegroundTracker: Stable Focus Changed to 131750
+2/4/2026 4:35:29 PM: ForegroundTracker: Stable Focus Changed to 66206
+2/4/2026 4:39:18 PM: Startup shortcut created at: C:\Users\Sanih\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\PinMe.lnk -> C:\Users\Sanih\AppData\Local\PinMe\SingleFile\PinWin.exe
+2/4/2026 4:39:18 PM: MainWindow: Constructor started
+2/4/2026 4:39:18 PM: MainWindow: InitializeComponent completed
+2/4/2026 4:39:18 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\EjtDHifHYu+UjwhMN8mYdJgW5l_lExo=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:39:18 PM: MainWindow: AppViewModel created
+2/4/2026 4:39:18 PM: MainWindow: DataContext set
+2/4/2026 4:39:18 PM: MainWindow: OnSourceInitialized started
+2/4/2026 4:39:18 PM: MainWindow: ViewModel initialized
+2/4/2026 4:39:18 PM: MainWindow: HwndHook added - FULLY INITIALIZED
+2/4/2026 4:39:18 PM: MainWindow: HWND created
+2/4/2026 4:39:18 PM: ForegroundTracker: Stable Focus Changed to 328132
+2/4/2026 4:39:19 PM: ForegroundTracker: Stable Focus Changed to 65978
+2/4/2026 4:39:19 PM: ForegroundTracker: Stable Focus Changed to 395082
+2/4/2026 4:39:24 PM: ForegroundTracker: Stable Focus Changed to 264048
+2/4/2026 4:40:05 PM: ForegroundTracker: Stable Focus Changed to 395082
+2/4/2026 4:40:09 PM: ForegroundTracker: Stable Focus Changed to 66032
+2/4/2026 4:40:39 PM: ForegroundTracker: Stable Focus Changed to 264048
+2/4/2026 4:40:45 PM: ForegroundTracker: Stable Focus Changed to 263628
+2/4/2026 4:40:45 PM: ForegroundTracker: Stable Focus Changed to 264048
+2/4/2026 4:40:57 PM: ForegroundTracker: Stable Focus Changed to 65978
+2/4/2026 4:40:57 PM: ForegroundTracker: Stable Focus Changed to 131746
+2/4/2026 4:40:58 PM: ForegroundTracker: Stable Focus Changed to 66202
+2/4/2026 4:51:32 PM: Startup shortcut created at: C:\Users\Sanih\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\PinMe.lnk -> C:\Users\Sanih\AppData\Local\Programs\PinMe\PinWin.exe
+2/4/2026 4:51:32 PM: MainWindow: Constructor started
+2/4/2026 4:51:32 PM: MainWindow: InitializeComponent completed
+2/4/2026 4:51:32 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\EjtDHifHYu+UjwhMN8mYdJgW5l_lExo=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:51:32 PM: MainWindow: AppViewModel created
+2/4/2026 4:51:32 PM: MainWindow: DataContext set
+2/4/2026 4:51:32 PM: MainWindow: OnSourceInitialized started
+2/4/2026 4:51:32 PM: MainWindow: ViewModel initialized
+2/4/2026 4:51:32 PM: MainWindow: HwndHook added - FULLY INITIALIZED
+2/4/2026 4:51:32 PM: MainWindow: HWND created
+2/4/2026 4:51:41 PM: ForegroundTracker: Stable Focus Changed to 133220
+2/4/2026 4:51:49 PM: ForegroundTracker: Stable Focus Changed to 133318
+2/4/2026 4:51:49 PM: ForegroundTracker: Stable Focus Changed to 67506
+2/4/2026 4:51:57 PM: ForegroundTracker: Stable Focus Changed to 65984
+2/4/2026 4:51:57 PM: ForegroundTracker: Stable Focus Changed to 131762
+2/4/2026 4:52:04 PM: ForegroundTracker: Stable Focus Changed to 66086
+2/4/2026 4:52:06 PM: ForegroundTracker: Stable Focus Changed to 198818
+2/4/2026 4:52:07 PM: ForegroundTracker: Stable Focus Changed to 1310774
+2/4/2026 4:52:14 PM: ForegroundTracker: Stable Focus Changed to 65984
+2/4/2026 4:52:14 PM: ForegroundTracker: Stable Focus Changed to 131762
+2/4/2026 4:52:15 PM: ForegroundTracker: Stable Focus Changed to 66218
+2/4/2026 4:57:29 PM: Startup shortcut created at: C:\Users\Sanih\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\PinMe.lnk -> C:\Users\Sanih\AppData\Local\Programs\PinMe\PinWin.exe
+2/4/2026 4:57:32 PM: MainWindow: Constructor started
+2/4/2026 4:57:32 PM: MainWindow: InitializeComponent completed
+2/4/2026 4:57:32 PM: SoundService: Initialized with sound file at C:\Users\Sanih\AppData\Local\Temp\.net\PinWin\rnRJXUUUhsOI3sJzIE3TEyeZFER3D1g=\Assets\mixkit-gear-fast-lock-tap-2857.wav
+2/4/2026 4:57:32 PM: MainWindow: AppViewModel created
+2/4/2026 4:57:32 PM: MainWindow: DataContext set
+2/4/2026 4:57:32 PM: MainWindow: OnSourceInitialized started
+2/4/2026 4:57:32 PM: MainWindow: ViewModel initialized
+2/4/2026 4:57:32 PM: MainWindow: HwndHook added - FULLY INITIALIZED
+2/4/2026 4:57:32 PM: MainWindow: HWND created
+2/4/2026 4:58:36 PM: ForegroundTracker: Stable Focus Changed to 3999512
+2/4/2026 4:58:41 PM: ForegroundTracker: Stable Focus Changed to 66886
+2/4/2026 4:58:42 PM: ForegroundTracker: Stable Focus Changed to 263156
+2/4/2026 4:58:45 PM: ForegroundTracker: Stable Focus Changed to 132148
+2/4/2026 4:58:46 PM: ForegroundTracker: Stable Focus Changed to 591436
+2/4/2026 4:58:47 PM: ForegroundTracker: Stable Focus Changed to 526034
+2/4/2026 4:58:49 PM: ToggleActiveWindowPin: Cursor at 1077,349 -> HWND 197132
+2/4/2026 4:58:49 PM: ToggleActiveWindowPin: Normalized 197132 to root owner 526034
+2/4/2026 4:58:49 PM: ToggleActiveWindowPin: Window 526034 is NOT PINNED - will pin it
+2/4/2026 4:58:49 PM: AppViewModel: Toggle request for 526034
+2/4/2026 4:58:49 PM: AppViewModel: Adding overlay
+2/4/2026 4:58:49 PM: OverlayService: Added overlay for 526034
+2/4/2026 4:58:49 PM: ForegroundTracker: Stable Focus Changed to 199130
+2/4/2026 4:58:49 PM: ToggleActiveWindowPin: Cursor at 1077,349 -> HWND 197132
+2/4/2026 4:58:49 PM: ToggleActiveWindowPin: Normalized 197132 to root owner 526034
+2/4/2026 4:58:49 PM: ToggleActiveWindowPin: Window 526034 is PINNED - will toggle (unpin) it
+2/4/2026 4:58:49 PM: AppViewModel: Toggle request for 526034
+2/4/2026 4:58:49 PM: UnpinWindow: HWND 526034
+2/4/2026 4:58:49 PM: AppViewModel: Removing overlay
+2/4/2026 4:58:49 PM: OverlayService: Removed overlay for 526034
+2/4/2026 4:59:27 PM: ForegroundTracker: Stable Focus Changed to 66886
+2/4/2026 4:59:28 PM: ForegroundTracker: Stable Focus Changed to 65994
+2/4/2026 4:59:28 PM: ForegroundTracker: Stable Focus Changed to 263156
+2/4/2026 4:59:32 PM: ForegroundTracker: Stable Focus Changed to 132096
+2/4/2026 4:59:34 PM: ForegroundTracker: Stable Focus Changed to 526034
+2/4/2026 4:59:35 PM: ToggleActiveWindowPin: Cursor at 1075,358 -> HWND 67508
+2/4/2026 4:59:35 PM: ToggleActiveWindowPin: Normalized 67508 to root owner 526034
+2/4/2026 4:59:35 PM: ToggleActiveWindowPin: Window 526034 is NOT PINNED - will pin it
+2/4/2026 4:59:35 PM: AppViewModel: Toggle request for 526034
+2/4/2026 4:59:35 PM: AppViewModel: Adding overlay
+2/4/2026 4:59:35 PM: OverlayService: Added overlay for 526034
+2/4/2026 4:59:35 PM: ForegroundTracker: Stable Focus Changed to 199130
+2/4/2026 4:59:37 PM: ForegroundTracker: Stable Focus Changed to 65994
+2/4/2026 4:59:37 PM: ForegroundTracker: Stable Focus Changed to 526750
+2/4/2026 4:59:38 PM: ForegroundTracker: Stable Focus Changed to 263156
+2/4/2026 5:01:08 PM: ForegroundTracker: Stable Focus Changed to 65994
+2/4/2026 5:01:08 PM: ForegroundTracker: Stable Focus Changed to 131812
+2/4/2026 5:01:09 PM: ForegroundTracker: Stable Focus Changed to 66268
