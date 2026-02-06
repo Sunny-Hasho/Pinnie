@@ -3,7 +3,7 @@ using System.IO;
 using System.Media;
 using System.Windows;
 
-namespace PinWin.Services
+namespace Pinnie.Services
 {
     public class SoundService
     {

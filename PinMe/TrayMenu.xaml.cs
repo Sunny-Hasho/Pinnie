@@ -3,12 +3,13 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Forms;
 
-namespace PinWin
+namespace Pinnie
 {
     public partial class TrayMenu : Window
     {
         public event EventHandler<bool>? ShowPetIconToggleClicked;
         public event EventHandler<bool>? ShowBorderToggleClicked;
+        public event EventHandler<bool>? StartupToggleClicked;
         public event EventHandler? ChangeIconClicked;
         public event EventHandler<int>? IconSizeChanged;
         public event EventHandler<string>? IconPositionChanged;
@@ -16,17 +17,20 @@ namespace PinWin
         public event EventHandler<int>? BorderRadiusChanged;
         public event EventHandler? BorderColorClicked;
         public event EventHandler<System.Windows.Media.Brush>? BorderColorChanged;
+        public event EventHandler<HotkeySubMenu.HotkeyEventArgs>? HotkeyChanged;
         public event EventHandler? ExitClicked;
 
         public event EventHandler<string>? PetIconChanged;
 
         private bool _showPetIcon = true;
         private bool _showBorder = true;
+        private bool _runOnStartup = false;
         private SubMenu? _iconSizeSubMenu;
         private SubMenu? _iconPositionSubMenu;
-        private SubMenu? _changeIconSubMenu; // New submenu for icons
+        private SubMenu? _changeIconSubMenu; 
         private SubMenu? _borderThicknessSubMenu;
         private SubMenu? _borderRadiusSubMenu;
+        private HotkeySubMenu? _hotkeySubMenu;
         private ColorPickerPopup? _colorPickerPopup;
         private System.Windows.Threading.DispatcherTimer? _clickDetectionTimer;
         public DateTime LastHideTime { get; private set; } = DateTime.Now.AddYears(-1);
@@ -133,19 +137,36 @@ namespace PinWin
                 BorderColorChanged?.Invoke(this, brush);
                 HideAllSubMenus();
             };
+
+            // Hotkey SubMenu
+            _hotkeySubMenu = new HotkeySubMenu();
+            _hotkeySubMenu.HotkeyChanged += (s, e) =>
+            {
+                HotkeyChanged?.Invoke(this, e);
+                // Don't close tray menu immediately? Or do? Maybe stay open to show it works
+                // But HideAllSubMenus is typical
+                HideAllSubMenus();
+            };
         }
 
-        public void SetStates(bool showPetIcon, bool showBorder)
+        public void SetStates(bool showPetIcon, bool showBorder, bool runOnStartup)
         {
             _showPetIcon = showPetIcon;
             _showBorder = showBorder;
+            _runOnStartup = runOnStartup;
             UpdateVisuals();
+        }
+
+        public void UpdateHotkeyDisplay(uint modifiers, uint key)
+        {
+            _hotkeySubMenu?.SetCurrentHotkey(modifiers, key);
         }
 
         private void UpdateVisuals()
         {
             ChkShowPetIcon.IsChecked = _showPetIcon;
             ChkShowBorder.IsChecked = _showBorder;
+            ChkRunOnStartup.IsChecked = _runOnStartup;
         }
 
         private void ClickDetectionTimer_Tick(object? sender, EventArgs e)
@@ -153,9 +174,9 @@ namespace PinWin
             if (!this.IsVisible) return;
 
             // Check if any mouse button is pressed
-            bool mouseButtonDown = (PinWin.Interop.Win32.GetAsyncKeyState(PinWin.Interop.Win32.VK_LBUTTON) & 0x8000) != 0 ||
-                                 (PinWin.Interop.Win32.GetAsyncKeyState(PinWin.Interop.Win32.VK_RBUTTON) & 0x8000) != 0 ||
-                                 (PinWin.Interop.Win32.GetAsyncKeyState(PinWin.Interop.Win32.VK_MBUTTON) & 0x8000) != 0;
+            bool mouseButtonDown = (Pinnie.Interop.Win32.GetAsyncKeyState(Pinnie.Interop.Win32.VK_LBUTTON) & 0x8000) != 0 ||
+                                 (Pinnie.Interop.Win32.GetAsyncKeyState(Pinnie.Interop.Win32.VK_RBUTTON) & 0x8000) != 0 ||
+                                 (Pinnie.Interop.Win32.GetAsyncKeyState(Pinnie.Interop.Win32.VK_MBUTTON) & 0x8000) != 0;
 
             if (mouseButtonDown && !this.IsMouseOver && 
                 !(_changeIconSubMenu?.IsMouseOver ?? false) &&
@@ -163,7 +184,8 @@ namespace PinWin
                 !(_iconPositionSubMenu?.IsMouseOver ?? false) &&
                 !(_borderThicknessSubMenu?.IsMouseOver ?? false) &&
                 !(_borderRadiusSubMenu?.IsMouseOver ?? false) &&
-                !(_colorPickerPopup?.IsMouseOver ?? false))
+                !(_colorPickerPopup?.IsMouseOver ?? false) &&
+                !(_hotkeySubMenu?.IsMouseOver ?? false))
             {
                 this.Hide();
             }
@@ -173,9 +195,9 @@ namespace PinWin
         {
             base.OnSourceInitialized(e);
             IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-            IntPtr exStyle = PinWin.Interop.Win32.GetWindowLongPtr(hwnd, PinWin.Interop.Win32.GWL_EXSTYLE);
-            PinWin.Interop.Win32.SetWindowLong(hwnd, PinWin.Interop.Win32.GWL_EXSTYLE, 
-                new IntPtr(exStyle.ToInt64() | (long)PinWin.Interop.Win32.WS_EX_NOACTIVATE | (long)PinWin.Interop.Win32.WS_EX_TOOLWINDOW));
+            IntPtr exStyle = Pinnie.Interop.Win32.GetWindowLongPtr(hwnd, Pinnie.Interop.Win32.GWL_EXSTYLE);
+            Pinnie.Interop.Win32.SetWindowLong(hwnd, Pinnie.Interop.Win32.GWL_EXSTYLE, 
+                new IntPtr(exStyle.ToInt64() | (long)Pinnie.Interop.Win32.WS_EX_NOACTIVATE | (long)Pinnie.Interop.Win32.WS_EX_TOOLWINDOW));
         }
 
         public void ShowAtMouse()
@@ -207,7 +229,7 @@ namespace PinWin
             if (_changeIconSubMenu?.IsVisible == true ||
                 _iconSizeSubMenu?.IsVisible == true || _iconPositionSubMenu?.IsVisible == true ||
                 _borderThicknessSubMenu?.IsVisible == true || _borderRadiusSubMenu?.IsVisible == true || 
-                _colorPickerPopup?.IsVisible == true)
+                _colorPickerPopup?.IsVisible == true || _hotkeySubMenu?.IsVisible == true)
                 return;
             
             this.Hide();
@@ -221,6 +243,7 @@ namespace PinWin
             _borderThicknessSubMenu?.Hide();
             _borderRadiusSubMenu?.Hide();
             _colorPickerPopup?.Hide();
+            _hotkeySubMenu?.Hide();
         }
 
         public new void Hide()
@@ -316,6 +339,25 @@ namespace PinWin
         {
             HideAllSubMenus();
             _colorPickerPopup?.ShowNextTo(BtnBorderColor, this);
+        }
+
+        private void BtnRunOnStartup_Click(object sender, RoutedEventArgs e)
+        {
+            _runOnStartup = !_runOnStartup;
+            UpdateVisuals();
+            StartupToggleClicked?.Invoke(this, _runOnStartup);
+        }
+
+        private void BtnHotkey_Click(object sender, RoutedEventArgs e)
+        {
+             HideAllSubMenus();
+            _hotkeySubMenu?.ShowNextTo(BtnHotkey, this);
+        }
+
+        private void BtnHotkey_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+             HideAllSubMenus();
+            _hotkeySubMenu?.ShowNextTo(BtnHotkey, this);
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)

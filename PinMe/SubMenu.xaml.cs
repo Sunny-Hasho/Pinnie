@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace PinWin
+namespace Pinnie
 {
     public partial class SubMenu : Window
     {
@@ -22,8 +22,8 @@ namespace PinWin
         {
             if (!this.IsVisible) return;
 
-            bool mouseButtonDown = (PinWin.Interop.Win32.GetAsyncKeyState(PinWin.Interop.Win32.VK_LBUTTON) & 0x8000) != 0 ||
-                                 (PinWin.Interop.Win32.GetAsyncKeyState(PinWin.Interop.Win32.VK_RBUTTON) & 0x8000) != 0;
+            bool mouseButtonDown = (Pinnie.Interop.Win32.GetAsyncKeyState(Pinnie.Interop.Win32.VK_LBUTTON) & 0x8000) != 0 ||
+                                 (Pinnie.Interop.Win32.GetAsyncKeyState(Pinnie.Interop.Win32.VK_RBUTTON) & 0x8000) != 0;
 
             if (mouseButtonDown && !this.IsMouseOver)
             {
@@ -35,9 +35,9 @@ namespace PinWin
         {
             base.OnSourceInitialized(e);
             IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-            IntPtr exStyle = PinWin.Interop.Win32.GetWindowLongPtr(hwnd, PinWin.Interop.Win32.GWL_EXSTYLE);
-            PinWin.Interop.Win32.SetWindowLong(hwnd, PinWin.Interop.Win32.GWL_EXSTYLE,
-                new IntPtr(exStyle.ToInt64() | (long)PinWin.Interop.Win32.WS_EX_NOACTIVATE | (long)PinWin.Interop.Win32.WS_EX_TOOLWINDOW));
+            IntPtr exStyle = Pinnie.Interop.Win32.GetWindowLongPtr(hwnd, Pinnie.Interop.Win32.GWL_EXSTYLE);
+            Pinnie.Interop.Win32.SetWindowLong(hwnd, Pinnie.Interop.Win32.GWL_EXSTYLE,
+                new IntPtr(exStyle.ToInt64() | (long)Pinnie.Interop.Win32.WS_EX_NOACTIVATE | (long)Pinnie.Interop.Win32.WS_EX_TOOLWINDOW));
         }
 
         public void AddMenuItem(string text, string value)

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -15,6 +15,8 @@
     <Description>A robust Windows utility to pin windows on top with visual feedback and glitch-free stacking.</Description>
     <Version>1.0.0</Version>
     <RepositoryUrl>https://github.com/your-username/PinMe</RepositoryUrl>
+    <ApplicationIcon>app_icon.ico</ApplicationIcon>
+    <Win32Icon>app_icon.ico</Win32Icon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +33,9 @@
     <None Include="Assets\mixkit-gear-fast-lock-tap-2857.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="app_icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

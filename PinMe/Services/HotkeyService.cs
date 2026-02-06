@@ -1,19 +1,17 @@
 using System;
 using System.Runtime.InteropServices;
-using PinWin.Interop;
+using Pinnie.Interop;
 
-namespace PinWin.Services
+namespace Pinnie.Services
 {
     public class HotkeyService
     {
         private const int ID_HOTKEY = 9000;
         public event EventHandler HotkeyPressed;
 
-        public bool Register(IntPtr hWnd)
+        public bool Register(IntPtr hWnd, uint modifiers, uint key)
         {
-            // Ctrl + Win + T
-            // T = 0x54
-            return Win32.RegisterHotKey(hWnd, ID_HOTKEY, Win32.MOD_CONTROL | Win32.MOD_WIN, 0x54);
+            return Win32.RegisterHotKey(hWnd, ID_HOTKEY, modifiers, key);
         }
 
         public void Unregister(IntPtr hWnd)

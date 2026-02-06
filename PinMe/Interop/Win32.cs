@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace PinWin.Interop
+namespace Pinnie.Interop
 {
     public static class Win32
     {

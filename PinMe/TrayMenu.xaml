@@ -1,4 +1,4 @@
-<Window x:Class="PinWin.TrayMenu"
+<Window x:Class="Pinnie.TrayMenu"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="TrayMenu" Height="Auto" Width="240"
@@ -91,6 +91,14 @@
                 </DockPanel>
             </Button>
 
+            <!-- Run on Startup Toggle -->
+            <Button x:Name="BtnRunOnStartup" Style="{StaticResource MenuItemStyle}" Click="BtnRunOnStartup_Click">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="Run on Startup" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <CheckBox x:Name="ChkRunOnStartup" Style="{StaticResource ToggleSwitchStyle}" HorizontalAlignment="Right" IsHitTestVisible="False"/>
+                </DockPanel>
+            </Button>
+
             <Rectangle Height="1" Fill="#EEE" Margin="5,5"/>
 
             <!-- Change Icon with Flyout Arrow -->
@@ -148,6 +156,17 @@
 
             <Rectangle Height="1" Fill="#EEE" Margin="5,5"/>
             
+            <Rectangle Height="1" Fill="#EEE" Margin="5,5"/>
+            
+            <!-- Hotkey Submenu Trigger -->
+            <Button x:Name="BtnHotkey" Style="{StaticResource MenuItemStyle}" Click="BtnHotkey_Click" MouseEnter="BtnHotkey_MouseEnter">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="⌨" Margin="0,0,10,0" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <TextBlock Text="Hotkey" VerticalAlignment="Center"/>
+                    <TextBlock Text="›" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0,0,0"/>
+                </DockPanel>
+            </Button>
+
             <Button Style="{StaticResource MenuItemStyle}" Click="BtnExit_Click" Foreground="#D32F2F">
                 <DockPanel LastChildFill="True">
                     <TextBlock Text="✕" Margin="3,0,13,0" VerticalAlignment="Center" DockPanel.Dock="Left" FontWeight="Bold"/>

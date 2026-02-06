@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using PinWin.Interop;
+using Pinnie.Interop;
 
-namespace PinWin.Services
+namespace Pinnie.Services
 {
     public class WindowPinService
     {

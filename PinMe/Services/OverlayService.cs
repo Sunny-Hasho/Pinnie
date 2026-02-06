@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Threading;
-using PinWin.Interop;
+using Pinnie.Interop;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace PinWin.Services
+namespace Pinnie.Services
 {
     public class OverlayService : IDisposable
     {

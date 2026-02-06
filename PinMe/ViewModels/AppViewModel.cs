@@ -1,9 +1,9 @@
 using System;
 using System.Windows;
-using PinWin.Interop;
-using PinWin.Services;
+using Pinnie.Interop;
+using Pinnie.Services;
 
-namespace PinWin.ViewModels
+namespace Pinnie.ViewModels
 {
     public class AppViewModel : IDisposable
     {
@@ -12,6 +12,7 @@ namespace PinWin.ViewModels
         private readonly TrayService _trayService;
         private readonly OverlayService _overlayService;
         private readonly SoundService _soundService;
+        private readonly SettingsService _settingsService;
         private IntPtr _mainWindowHandle;
         private IntPtr _foregroundHook = IntPtr.Zero;
         private Win32.WinEventDelegate _foregroundHookDelegate; // Keep ref to prevent GC
@@ -21,6 +22,7 @@ namespace PinWin.ViewModels
 
         public AppViewModel()
         {
+            _settingsService = new SettingsService(); // Load settings first
             _pinService = new WindowPinService();
             _hotkeyService = new HotkeyService();
             _trayService = new TrayService();
@@ -44,7 +46,17 @@ namespace PinWin.ViewModels
 
             _trayService.Initialize();
 
-            _trayService.ExitRequested += (s, e) => System.Windows.Application.Current.Shutdown();
+            _trayService.ExitRequested += (s, e) => 
+            {
+                _trayService.SetStartup(false);
+                System.Windows.Application.Current.Shutdown();
+            };
+            
+            _trayService.HotkeyChanged += (s, e) =>
+            {
+                UpdateHotkey(e.Modifiers, e.Key);
+            };
+
             _trayService.PinWindowRequested += (s, hwnd) => TogglePinState(hwnd); 
             _trayService.ShowPetIconChanged += (s, enabled) => _overlayService.SetPetIconState(enabled);
             _trayService.ShowBorderChanged += (s, enabled) => _overlayService.SetBorderState(enabled);
@@ -90,13 +102,45 @@ namespace PinWin.ViewModels
         public void Initialize(IntPtr windowHandle)
         {
             _mainWindowHandle = windowHandle;
-            if (!_hotkeyService.Register(_mainWindowHandle))
+            
+            uint modifiers = _settingsService.CurrentSettings.HotkeyModifiers;
+            uint key = _settingsService.CurrentSettings.HotkeyKey;
+
+            Logger.Log($"Initializing Hotkey: Modifiers={modifiers}, Key={key:X}");
+
+            if (!_hotkeyService.Register(_mainWindowHandle, modifiers, key))
             {
-                System.Windows.MessageBox.Show("Failed to register hotkey (Ctrl + Win + T). It might be in use.", "PinWin Error");
+                System.Windows.MessageBox.Show("Failed to register hotkey. It might be in use.", "PinWin Error");
             }
+            
+            // Update Tray Display
+            _trayService.UpdateHotkeyDisplay(modifiers, key);
             
             // Seed initial state
             _currentForegroundWindow = Win32.GetForegroundWindow();
+        }
+
+        public void UpdateHotkey(uint modifiers, uint key)
+        {
+            _hotkeyService.Unregister(_mainWindowHandle);
+            
+            if (_hotkeyService.Register(_mainWindowHandle, modifiers, key))
+            {
+                _settingsService.CurrentSettings.HotkeyModifiers = modifiers;
+                _settingsService.CurrentSettings.HotkeyKey = key;
+                _settingsService.Save();
+                
+                _trayService.UpdateHotkeyDisplay(modifiers, key);
+                
+                Logger.Log($"Hotkey updated to Modifiers={modifiers}, Key={key:X}");
+            }
+            else
+            {
+                // Revert? Or just show error
+                System.Windows.MessageBox.Show("Failed to register new hotkey. Keeping old one.", "PinWin Error");
+                // Try re-registering old one
+                 _hotkeyService.Register(_mainWindowHandle, _settingsService.CurrentSettings.HotkeyModifiers, _settingsService.CurrentSettings.HotkeyKey);
+            }
         }
 
         public void ProcessMessage(int msg, IntPtr wParam)

@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace PinWin
+namespace Pinnie
 {
     public partial class ColorPickerWindow : Window
     {
