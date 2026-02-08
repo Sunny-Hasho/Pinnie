@@ -28,18 +28,41 @@ namespace Pinnie
             this.Handle = new WindowInteropHelper(this).Handle;
             
             // Set styles: Transparent (Click-through) | ToolWindow (Hide from Alt-Tab) | NoActivate (Never steal focus)
-            // This ensures hotkey always targets the same window on repeated presses
             int extendedStyle = Win32.GetWindowLongPtr(this.Handle, Win32.GWL_EXSTYLE).ToInt32();
             Win32.SetWindowLong(this.Handle, Win32.GWL_EXSTYLE, extendedStyle | (int)Win32.WS_EX_TRANSPARENT | (int)Win32.WS_EX_TOOLWINDOW | (int)Win32.WS_EX_NOACTIVATE);
 
-            Pinnie.Interop.Win32.SetWindowPos(this.Handle, Pinnie.Interop.Win32.HWND_TOPMOST, 0, 0, 0, 0, Pinnie.Interop.Win32.SWP_NOMOVE | Pinnie.Interop.Win32.SWP_NOSIZE | Pinnie.Interop.Win32.SWP_SHOWWINDOW);
+            Win32.SetWindowPos(this.Handle, Win32.HWND_TOPMOST, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE | Win32.SWP_SHOWWINDOW);
+
+            // Hook into the message loop to prevent Windows from clamping the window size (fixes 2K/4K monitor issues)
+            HwndSource source = HwndSource.FromHwnd(this.Handle);
+            source.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == Win32.WM_GETMINMAXINFO)
+            {
+                // Marshal the MINMAXINFO structure
+                Win32.MINMAXINFO mmi = (Win32.MINMAXINFO)System.Runtime.InteropServices.Marshal.PtrToStructure(lParam, typeof(Win32.MINMAXINFO));
+
+                // Adjust the maximizing size and position
+                // Set to extremely large values to prevent clamping on high-res monitors
+                mmi.ptMaxTrackSize.X = 30000;
+                mmi.ptMaxTrackSize.Y = 30000;
+                mmi.ptMaxSize.X = 30000;
+                mmi.ptMaxSize.Y = 30000;
+                
+                // Copy back to unmanaged memory
+                System.Runtime.InteropServices.Marshal.StructureToPtr(mmi, lParam, true);
+            }
+
+            return IntPtr.Zero;
         }
 
         public void SetPetVisible(bool visible)
         {
             PetIcon.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
-
         public void SetBorderVisible(bool visible)
         {
             MainBorder.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
@@ -148,7 +171,9 @@ namespace Pinnie
             // Get current DPI scale
             var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(this);
             // Return physical pixels (Logical Height * DPI Scale)
-            return HeaderRow.Height.Value * dpi.PixelsPerDip;
+            // Use ActualHeight when available; fall back to configured Height value.
+            double logicalHeight = HeaderRow.ActualHeight > 0 ? HeaderRow.ActualHeight : HeaderRow.Height.Value;
+            return logicalHeight * dpi.DpiScaleY;
         }
     }
 }

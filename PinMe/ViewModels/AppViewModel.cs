@@ -29,6 +29,10 @@ namespace Pinnie.ViewModels
             _overlayService = new OverlayService();
             _soundService = new SoundService();
 
+            // Set TrayService properties from loaded settings before initialization
+            _trayService.ShowPetIcon = _settingsService.CurrentSettings.ShowPetIcon;
+            _trayService.ShowBorder = _settingsService.CurrentSettings.ShowBorder;
+
             // Initialize Focus Debounce Timer
             _focusDebounceTimer = new System.Windows.Threading.DispatcherTimer();
             _focusDebounceTimer.Interval = TimeSpan.FromMilliseconds(100); // 100ms delay to accept focus
@@ -58,14 +62,58 @@ namespace Pinnie.ViewModels
             };
 
             _trayService.PinWindowRequested += (s, hwnd) => TogglePinState(hwnd); 
-            _trayService.ShowPetIconChanged += (s, enabled) => _overlayService.SetPetIconState(enabled);
-            _trayService.ShowBorderChanged += (s, enabled) => _overlayService.SetBorderState(enabled);
-            _trayService.BorderThicknessChanged += (s, thickness) => _overlayService.SetBorderThickness(thickness);
-            _trayService.BorderRadiusChanged += (s, radius) => _overlayService.SetCornerRadius(radius);
-            _trayService.BorderColorChanged += (s, color) => _overlayService.SetBorderColor(color);
-            _trayService.PetIconChanged += (s, path) => _overlayService.SetPetIcon(path);
-            _trayService.PetIconSizeChanged += (s, size) => _overlayService.SetPetIconSize(size);
-            _trayService.IconPositionChanged += (s, position) => _overlayService.SetPetIconPosition(position);
+            _trayService.ShowPetIconChanged += (s, enabled) => 
+            {
+                _overlayService.SetPetIconState(enabled);
+                _settingsService.CurrentSettings.ShowPetIcon = enabled;
+                _settingsService.Save();
+            };
+            _trayService.ShowBorderChanged += (s, enabled) => 
+            {
+                _overlayService.SetBorderState(enabled);
+                _settingsService.CurrentSettings.ShowBorder = enabled;
+                _settingsService.Save();
+            };
+            _trayService.BorderThicknessChanged += (s, thickness) => 
+            {
+                _overlayService.SetBorderThickness(thickness);
+                _settingsService.CurrentSettings.BorderThickness = thickness;
+                _settingsService.Save();
+            };
+            _trayService.BorderRadiusChanged += (s, radius) => 
+            {
+                _overlayService.SetCornerRadius(radius);
+                _settingsService.CurrentSettings.BorderRadius = radius;
+                _settingsService.Save();
+            };
+            _trayService.BorderColorChanged += (s, color) => 
+            {
+                _overlayService.SetBorderColor(color);
+                // Convert Brush to hex string for storage
+                if (color is System.Windows.Media.SolidColorBrush solidBrush)
+                {
+                    _settingsService.CurrentSettings.BorderColor = $"#{solidBrush.Color.R:X2}{solidBrush.Color.G:X2}{solidBrush.Color.B:X2}";
+                }
+                _settingsService.Save();
+            };
+            _trayService.PetIconChanged += (s, path) => 
+            {
+                _overlayService.SetPetIcon(path);
+                _settingsService.CurrentSettings.PetIconPath = path;
+                _settingsService.Save();
+            };
+            _trayService.PetIconSizeChanged += (s, size) => 
+            {
+                _overlayService.SetPetIconSize(size);
+                _settingsService.CurrentSettings.PetIconSize = size;
+                _settingsService.Save();
+            };
+            _trayService.IconPositionChanged += (s, position) => 
+            {
+                _overlayService.SetPetIconPosition(position);
+                _settingsService.CurrentSettings.PetIconPosition = position;
+                _settingsService.Save();
+            };
 
             _hotkeyService.HotkeyPressed += (s, e) => ToggleActiveWindowPin();
         }
@@ -103,9 +151,20 @@ namespace Pinnie.ViewModels
         {
             _mainWindowHandle = windowHandle;
             
-            uint modifiers = _settingsService.CurrentSettings.HotkeyModifiers;
-            uint key = _settingsService.CurrentSettings.HotkeyKey;
+            // Load and apply all settings
+            LoadAndApplySettings();
+            
+            // Seed initial state
+            _currentForegroundWindow = Win32.GetForegroundWindow();
+        }
 
+        private void LoadAndApplySettings()
+        {
+            var settings = _settingsService.CurrentSettings;
+            
+            // Apply hotkey settings
+            uint modifiers = settings.HotkeyModifiers;
+            uint key = settings.HotkeyKey;
             Logger.Log($"Initializing Hotkey: Modifiers={modifiers}, Key={key:X}");
 
             if (!_hotkeyService.Register(_mainWindowHandle, modifiers, key))
@@ -116,8 +175,61 @@ namespace Pinnie.ViewModels
             // Update Tray Display
             _trayService.UpdateHotkeyDisplay(modifiers, key);
             
-            // Seed initial state
-            _currentForegroundWindow = Win32.GetForegroundWindow();
+            // Apply visual settings
+            _overlayService.SetPetIconState(settings.ShowPetIcon);
+            _overlayService.SetBorderState(settings.ShowBorder);
+            _overlayService.SetBorderThickness(settings.BorderThickness);
+            _overlayService.SetCornerRadius(settings.BorderRadius);
+            
+            // Convert hex string to Brush for border color
+            try
+            {
+                var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.BorderColor);
+                var brush = new System.Windows.Media.SolidColorBrush(color);
+                _overlayService.SetBorderColor(brush);
+            }
+            catch
+            {
+                // Fallback to white if color parsing fails
+                _overlayService.SetBorderColor(System.Windows.Media.Brushes.White);
+            }
+            
+            // Apply pet icon settings
+            string defaultPath = "pack://application:,,,/Assets/capy.gif";
+            string iconPath = settings.PetIconPath;
+
+            if (!string.IsNullOrEmpty(iconPath))
+            {
+                // If it's a Pack URI, use it directly (Internal Resource)
+                if (iconPath.StartsWith("pack://"))
+                {
+                    _overlayService.SetPetIcon(iconPath);
+                }
+                // If it's a File Path, verify existence (Custom Import)
+                else if (System.IO.File.Exists(iconPath))
+                {
+                    _overlayService.SetPetIcon(iconPath);
+                }
+                else
+                {
+                    // Fallback if custom file missing
+                     _overlayService.SetPetIcon(defaultPath);
+                }
+            }
+            else
+            {
+                // Default to Capybara
+                _overlayService.SetPetIcon(defaultPath);
+                settings.PetIconPath = defaultPath;
+                _settingsService.Save();
+            }
+            
+            _overlayService.SetPetIconSize(settings.PetIconSize);
+            _overlayService.SetPetIconPosition(settings.PetIconPosition);
+            
+            // Update tray service state
+            _trayService.ShowPetIcon = settings.ShowPetIcon;
+            _trayService.ShowBorder = settings.ShowBorder;
         }
 
         public void UpdateHotkey(uint modifiers, uint key)

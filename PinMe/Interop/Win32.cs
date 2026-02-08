@@ -95,6 +95,17 @@ namespace Pinnie.Interop
         [DllImport("user32.dll")]
         public static extern int GetDpiForWindow(IntPtr hWnd);
 
+        // Monitor / per-monitor DPI (for dual-screen correct positioning)
+        public const uint MONITOR_DEFAULTTONEAREST = 2;
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
+
+        public const int MDT_EFFECTIVE_DPI = 0;
+
+        [DllImport("Shcore.dll")]
+        public static extern int GetDpiForMonitor(IntPtr hmonitor, int dpiType, out uint dpiX, out uint dpiY);
+
         // GetAncestor - to get root window from child windows
         public const int GA_ROOT = 2;
         public const int GA_ROOTOWNER = 3;
@@ -208,6 +219,21 @@ namespace Pinnie.Interop
         public const int VK_LBUTTON = 0x01;
         public const int VK_RBUTTON = 0x02;
         public const int VK_MBUTTON = 0x04;
+
+
+        
+        // Window Sizing
+        public const int WM_GETMINMAXINFO = 0x0024;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MINMAXINFO
+        {
+            public POINT ptReserved;
+            public POINT ptMaxSize;
+            public POINT ptMaxPosition;
+            public POINT ptMinTrackSize;
+            public POINT ptMaxTrackSize;
+        }
 
         [DllImport("user32.dll")]
         public static extern short GetAsyncKeyState(int vKey);

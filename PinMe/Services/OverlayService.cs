@@ -23,8 +23,8 @@ namespace Pinnie.Services
             _trackingTimer.Tick += TrackingTimer_Tick;
             _trackingTimer.Start();
 
-            // Set default icon to Capybara
-            CurrentPetIconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "capy.gif");
+            // Set default icon to Capybara (Pack URI)
+            CurrentPetIconPath = "pack://application:,,,/Assets/capy.gif";
 
             // Hook animation events for seamless transitions
             _animationHookDelegate = new Win32.WinEventDelegate(AnimationEventProc);
@@ -330,7 +330,8 @@ namespace Pinnie.Services
                 double actualHeight = overlay.GetActualHeaderHeight();
                 if (actualHeight > 0)
                 {
-                    petOffset = (int)Math.Round(actualHeight);
+                    // Use ceiling to avoid undersizing due to fractional DPI scaling.
+                    petOffset = (int)Math.Ceiling(actualHeight);
                 }
             }
             catch 

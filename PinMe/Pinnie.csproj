@@ -21,21 +21,11 @@
 
   <ItemGroup>
     <Resource Include="Assets\Orange-Car.gif" />
-    <Content Include="Assets\capy.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\cat.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\guinea.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="Assets\mixkit-gear-fast-lock-tap-2857.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="app_icon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Assets\capy.gif" />
+    <Resource Include="Assets\cat.gif" />
+    <Resource Include="Assets\guinea.gif" />
+    <Resource Include="Assets\mixkit-gear-fast-lock-tap-2857.wav" />
+    <Resource Include="app_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

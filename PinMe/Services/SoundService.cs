@@ -8,35 +8,19 @@ namespace Pinnie.Services
     public class SoundService
     {
         private readonly SoundPlayer _soundPlayer;
-        private readonly string _soundFilePath;
 
         public SoundService()
         {
             _soundPlayer = new SoundPlayer();
-            
-            // Path to the sound file in Assets folder
-            _soundFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "mixkit-gear-fast-lock-tap-2857.wav");
-            
-            // Verify the sound file exists
-            if (!File.Exists(_soundFilePath))
-            {
-                Logger.Log($"SoundService: Warning - Sound file not found at {_soundFilePath}");
-            }
-            else
-            {
-                Logger.Log($"SoundService: Initialized with sound file at {_soundFilePath}");
-            }
         }
 
         public void PlayPinSound()
         {
             PlaySound();
         }
-
+        
         public void PlayUnpinSound()
         {
-            // Using the same sound for both pin and unpin
-            // If you want different sounds, we can add a second file
             PlaySound();
         }
 
@@ -44,14 +28,14 @@ namespace Pinnie.Services
         {
             try
             {
-                if (File.Exists(_soundFilePath))
+                // Load from Embedded Resource using Pack URI
+                var uri = new Uri("pack://application:,,,/Assets/mixkit-gear-fast-lock-tap-2857.wav", UriKind.Absolute);
+                var resourceStream = System.Windows.Application.GetResourceStream(uri);
+                
+                if (resourceStream != null)
                 {
-                    _soundPlayer.SoundLocation = _soundFilePath;
-                    _soundPlayer.Play(); // Play asynchronously (non-blocking)
-                }
-                else
-                {
-                    Logger.Log("SoundService: Cannot play sound - file not found");
+                    _soundPlayer.Stream = resourceStream.Stream;
+                    _soundPlayer.Play();
                 }
             }
             catch (Exception ex)

@@ -83,7 +83,7 @@ namespace Pinnie.Services
             {
                 Icon = appIcon,
                 Visible = true,
-                Text = "PinMe"
+                Text = AppName
             };
             
             _notifyIcon.MouseClick += NotifyIcon_MouseClick;

@@ -87,9 +87,9 @@ namespace Pinnie
                 }
                 else
                 {
-                    // Construct full path for presets
-                    string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", value);
-                    PetIconChanged?.Invoke(this, fullPath);
+                    // Use Pack URI for built-in resources
+                    string packUri = $"pack://application:,,,/Assets/{value}";
+                    PetIconChanged?.Invoke(this, packUri);
                 }
                 HideAllSubMenus();
             };
@@ -202,24 +202,56 @@ namespace Pinnie
 
         public void ShowAtMouse()
         {
-            var mousePos = System.Windows.Forms.Cursor.Position;
-            
-            DpiScale dpi = VisualTreeHelper.GetDpi(this);
-            double scaleX = dpi.DpiScaleX;
-            double scaleY = dpi.DpiScaleY;
+            var mousePosPx = System.Windows.Forms.Cursor.Position;
+            var screen = System.Windows.Forms.Screen.FromPoint(mousePosPx);
+            var workAreaPx = screen.WorkingArea; // excludes taskbar on the monitor under cursor
 
-            double wpfX = mousePos.X / scaleX;
-            double wpfY = mousePos.Y / scaleY;
+            // Use primary monitor DPI for pixel->DIP conversion so WPF coordinates are correct on dual-screen.
+            // (GetDpiForWindow would return the window's monitor, which is wrong on first open.)
+            uint primaryDpiX = 96, primaryDpiY = 96;
+            var primaryPt = new Pinnie.Interop.Win32.POINT { X = 0, Y = 0 };
+            IntPtr hMonPrimary = Pinnie.Interop.Win32.MonitorFromPoint(primaryPt, Pinnie.Interop.Win32.MONITOR_DEFAULTTONEAREST);
+            if (hMonPrimary != IntPtr.Zero &&
+                Pinnie.Interop.Win32.GetDpiForMonitor(hMonPrimary, Pinnie.Interop.Win32.MDT_EFFECTIVE_DPI, out primaryDpiX, out primaryDpiY) == 0)
+            {
+                // use primaryDpiX/Y
+            }
+            double scalePxToDip = primaryDpiX / 96.0;
 
-            double height = this.ActualHeight > 0 ? this.ActualHeight : 300;
+            // Convert virtual screen pixels to WPF DIPs (primary-DPI-based)
+            double mouseX = mousePosPx.X / scalePxToDip;
+            double mouseY = mousePosPx.Y / scalePxToDip;
+            double workLeft = workAreaPx.Left / scalePxToDip;
+            double workTop = workAreaPx.Top / scalePxToDip;
+            double workRight = workAreaPx.Right / scalePxToDip;
+            double workBottom = workAreaPx.Bottom / scalePxToDip;
 
-            this.Left = wpfX - this.Width + 20;
-            this.Top = wpfY - height - 10;
-
-            if (this.Top < 0) this.Top = 10;
-            if (this.Left < 0) this.Left = 10;
-
+            // Show first (invisible) so WPF has ActualWidth/ActualHeight on first open (fixes first-time bug).
+            double prevOpacity = this.Opacity;
+            this.Opacity = 0;
             this.Show();
+            this.UpdateLayout();
+
+            double windowWidth = this.ActualWidth > 0 ? this.ActualWidth : this.Width;
+            double windowHeight = this.ActualHeight;
+            if (windowHeight <= 0 || double.IsNaN(windowHeight))
+                windowHeight = 300;
+
+            // Position: slightly left of cursor, above cursor
+            double left = mouseX - windowWidth + 20;
+            double top = mouseY - windowHeight - 10;
+
+            // Clamp to working area so it never goes off-screen or under taskbar (dual-screen + first open).
+            const double margin = 10;
+            if (left < workLeft + margin) left = workLeft + margin;
+            if (left + windowWidth > workRight - margin) left = workRight - windowWidth - margin;
+            if (top < workTop + margin) top = workTop + margin;
+            if (top + windowHeight > workBottom - margin) top = workBottom - windowHeight - margin;
+
+            this.Left = left;
+            this.Top = top;
+
+            this.Opacity = prevOpacity;
             _clickDetectionTimer?.Start();
         }
 
