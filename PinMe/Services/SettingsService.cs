@@ -7,8 +7,8 @@ namespace Pinnie.Services
     public class AppSettings
     {
         // Hotkey settings
-        // Default: Ctrl (2) + Win (8) = 10. Key T (0x54).
-        public uint HotkeyModifiers { get; set; } = 10; 
+        // Default: Ctrl (2) + Alt (1) = 3. Key T (0x54).
+        public uint HotkeyModifiers { get; set; } = 3; 
         public uint HotkeyKey { get; set; } = 0x54; 
         
         // Visual settings
