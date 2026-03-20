@@ -101,6 +101,9 @@ namespace Pinnie.Interop
         [DllImport("user32.dll")]
         public static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
         public const int MDT_EFFECTIVE_DPI = 0;
 
         [DllImport("Shcore.dll")]

@@ -15,6 +15,8 @@ namespace Pinnie.Services
         private IntPtr _animationHook;
         private Win32.WinEventDelegate? _animationHookDelegate;
 
+        public event EventHandler<IntPtr>? TargetWindowClosed;
+
         public OverlayService()
         {
             // Set priority to Send (highest) to ensure tracking logic isn't delayed by layout/rendering
@@ -50,23 +52,30 @@ namespace Pinnie.Services
 
             var overlay = new OverlayWindow();
             overlay.SuppressionTicks = 5; // Suppress for 50ms to allow first position calc
-            overlay.Show();
+            
+            // 1. Force handle creation WITHOUT showing
+            var helper = new System.Windows.Interop.WindowInteropHelper(overlay);
+            helper.EnsureHandle();
+            
+            // 2. Set owner immediately to synchronize with target window's monitor/stack
+            Win32.SetWindowLong(helper.Handle, Win32.GWLP_HWNDPARENT, targetHwnd);
+            
+            // 3. Position window PRIOR to showing to eliminate "300x300" flash
+            UpdateOverlayPosition(targetHwnd, overlay);
+            
             _overlays.Add(targetHwnd, overlay);
             Logger.Log($"OverlayService: Added overlay for {targetHwnd}");
-
-            // Note: We do NOT set Owner here anymore.
-            // WindowPinService handles the complex "Zipper" chaining.
             
-            // Immediate update
-            // Immediate update
+            // 4. Now show - it will appear at the correct size/pos on its first frame
+            overlay.Show();
+            
+            // Re-update just in case Show() triggered layout shifts
             UpdateOverlayPosition(targetHwnd, overlay);
 
             // Apply global settings
             // Pet visibility is handled in UpdateOverlayPosition loop
+            // Pet visibility is handled in UpdateOverlayPosition loop
             overlay.SetBorderVisible(IsBorderEnabled);
-            overlay.SetBorderThickness(CurrentBorderThickness);
-            overlay.SetBorderThickness(CurrentBorderThickness);
-            overlay.SetBorderCornerRadius(CurrentCornerRadius);
             overlay.SetBorderThickness(CurrentBorderThickness);
             overlay.SetBorderCornerRadius(CurrentCornerRadius);
             overlay.SetBorderBrush(CurrentBorderBrush);
@@ -225,6 +234,7 @@ namespace Pinnie.Services
                  Win32.RECT temp;
                  if (!Win32.GetWindowRect(hwnd, out temp))
                  {
+                    TargetWindowClosed?.Invoke(this, hwnd);
                     RemoveOverlay(hwnd); // Window closed
                     return;
                  }
@@ -326,8 +336,14 @@ namespace Pinnie.Services
             int petOffset = 0;
             try 
             {
-                // Try to get exact rendered height from WPF
-                double actualHeight = overlay.GetActualHeaderHeight();
+                // Synchronize DPI with the target window immediately to prevent "jumps" on multiple monitors
+                int targetDpiVal = Win32.GetDpiForWindow(hwnd);
+                if (targetDpiVal == 0) targetDpiVal = 96;
+                double targetScale = targetDpiVal / 96.0;
+                var targetDpi = new System.Windows.DpiScale(targetScale, targetScale);
+
+                // Try to get exact rendered height from WPF (using target DPI)
+                double actualHeight = overlay.GetActualHeaderHeight(targetDpi);
                 if (actualHeight > 0)
                 {
                     // Use ceiling to avoid undersizing due to fractional DPI scaling.
@@ -360,10 +376,38 @@ namespace Pinnie.Services
                 // Pet visibility is already set via SetPetVisible above
             }
 
-            // Position
+            // Position (Win32 Physical)
             Win32.SetWindowPos(overlay.Handle, IntPtr.Zero, 
                 rect.Left, finalTop, width, finalHeight, 
                 Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE | Win32.SWP_SHOWWINDOW);
+
+            // SYNC WPF PROPERTIES (Logical Units)
+            // This prevents WPF from "snapping" back to default 300x300 sizes during frames where
+            // it might ignore Win32-only positioning.
+            try 
+            {
+                int currentDpiVal = Win32.GetDpiForWindow(hwnd);
+                if (currentDpiVal == 0) currentDpiVal = 96;
+                double currentScale = currentDpiVal / 96.0;
+
+                // Update properties in logical units
+                if (overlay.WindowStartupLocation != System.Windows.WindowStartupLocation.Manual)
+                    overlay.WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+
+                overlay.Left = rect.Left / currentScale;
+                overlay.Top = finalTop / currentScale;
+                overlay.Width = width / currentScale;
+                overlay.Height = finalHeight / currentScale;
+
+                // REVEAL ONLY AFTER STABLE (usually ~20ms / 2 ticks)
+                // This hides the initial "jump" frame on secondary monitors.
+                overlay.StabilityTicks++;
+                if (overlay.StabilityTicks >= 3 && overlay.Opacity < 1.0)
+                {
+                    overlay.Opacity = 1.0;
+                }
+            }
+            catch { }
         }
 
         private void AnimationEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)

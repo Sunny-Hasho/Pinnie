@@ -14,14 +14,16 @@ namespace Pinnie.Services
             _soundPlayer = new SoundPlayer();
         }
 
+        public bool IsMuted { get; set; }
+
         public void PlayPinSound()
         {
-            PlaySound();
+            if (!IsMuted) PlaySound();
         }
         
         public void PlayUnpinSound()
         {
-            PlaySound();
+            if (!IsMuted) PlaySound();
         }
 
         private void PlaySound()

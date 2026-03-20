@@ -19,6 +19,8 @@ namespace Pinnie
         public double CachedDpiScale { get; set; } = 1.0;
         public Win32.RECT CachedFrameOffset { get; set; } // Left/Top/Right/Bottom diffs
 
+        public int StabilityTicks { get; set; } // Number of positioning syncs performed
+
         // For smoothing transitions (Maximize/Restore/Initial)
         public int SuppressionTicks { get; set; } = 0;
 
@@ -166,10 +168,11 @@ namespace Pinnie
             }
         }
 
-        public double GetActualHeaderHeight()
+        public double GetActualHeaderHeight(DpiScale? overrideDpi = null)
         {
-            // Get current DPI scale
-            var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(this);
+            // Get DPI scale (use override if provided, otherwise current visual tree DPI)
+            var dpi = overrideDpi ?? System.Windows.Media.VisualTreeHelper.GetDpi(this);
+            
             // Return physical pixels (Logical Height * DPI Scale)
             // Use ActualHeight when available; fall back to configured Height value.
             double logicalHeight = HeaderRow.ActualHeight > 0 ? HeaderRow.ActualHeight : HeaderRow.Height.Value;

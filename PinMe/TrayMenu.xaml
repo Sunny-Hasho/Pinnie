@@ -99,6 +99,14 @@
                 </DockPanel>
             </Button>
 
+            <!-- Sound Enabled Toggle -->
+            <Button x:Name="BtnSoundEnabled" Style="{StaticResource MenuItemStyle}" Click="BtnSoundEnabled_Click">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="Sound Enabled" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <CheckBox x:Name="ChkSoundEnabled" Style="{StaticResource ToggleSwitchStyle}" HorizontalAlignment="Right" IsHitTestVisible="False"/>
+                </DockPanel>
+            </Button>
+
             <Rectangle Height="1" Fill="#EEE" Margin="5,5"/>
 
             <!-- Change Icon with Flyout Arrow -->

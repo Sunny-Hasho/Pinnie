@@ -22,6 +22,9 @@ namespace Pinnie.Services
         public string? PetIconPath { get; set; } // Will be set to default capy.gif path if null
         public int PetIconSize { get; set; } = 50; // Default: Medium (50px)
         public string PetIconPosition { get; set; } = "Center"; // Default: Center
+
+        // Sound settings
+        public bool SoundEnabled { get; set; } = true;
     }
 
     public class SettingsService

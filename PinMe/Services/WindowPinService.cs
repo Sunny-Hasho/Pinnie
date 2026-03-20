@@ -70,75 +70,56 @@ namespace Pinnie.Services
 
             if (_pinnedStack.Count == 0) return;
 
-            // Strategy: "ZIPPER CHAINING"
-            // We interleave the Overlays into the Window Hierarchy to ensure correct Z-Order.
-            
-            // Desired Stack (Visual Top to Bottom):
-            // Pin[0]
-            // Overlay[0]
-            // Pin[1]
-            // Overlay[1]
-            
-            // Ownership Chain (Bottom Owns Top):
-            // Overlay[1] (Bottom-most border) 
-            //    -> Owns Pin[1] (Bottom Window)
-            //        -> Owns Overlay[0] (Top Window Border)
-            //            -> Owns Pin[0] (Top Window)
-            
-            // Wait, "Owner" is always BELOW "Child".
-            // So if Pin1 Owns Pin0 -> Pin0 is ABOVE Pin1.
-            
-            // Correct Chain Logic:
-            // A = Owner, B = Child. B is above A.
-            
-            // Chain:
-            // Pin[Last] (Bottom Base)
-            //   -> Owns Overlay[Last] (Border for Bottom)
-            //       -> Owns Pin[Last-1] (Window Above)
-            //           -> Owns Overlay[Last-1] (Border for Top)
-            // ... and so on.
-
-            // 1. Reset all links first to prevent cycles
+            // 1. Reset all links first to prevent cycles and cross-monitor leaks
             foreach (var pin in _pinnedStack)
             {
-                Win32.SetWindowLong(pin, Win32.GWLP_HWNDPARENT, IntPtr.Zero);
+                SetOwnerIfChanged(pin, IntPtr.Zero);
                 if (_overlayMap.TryGetValue(pin, out var ov))
                 {
-                    Win32.SetWindowLong(ov, Win32.GWLP_HWNDPARENT, IntPtr.Zero);
+                    SetOwnerIfChanged(ov, IntPtr.Zero);
                 }
             }
 
-            // 2. Build the Zipper from Bottom Up (Last Index -> 0)
-            
-            // The "Current Base" is the Handle that will OWN the next item up the stack.
-            // Start with the absolute bottom window.
-            IntPtr currentBase = _pinnedStack[_pinnedStack.Count - 1]; // Bottom Pin
-            
-            // If bottom pin has an overlay, that overlay should sit on top of it.
-            if (_overlayMap.TryGetValue(currentBase, out var bottomOverlay))
+            // 2. Group windows by their current monitor
+            // This prevents "Zipper Chaining" from creating cross-monitor ownership which causes glitches.
+            var monitorGroups = new Dictionary<IntPtr, List<IntPtr>>();
+            foreach (var pin in _pinnedStack)
             {
-                Win32.SetWindowLong(bottomOverlay, Win32.GWLP_HWNDPARENT, currentBase);
-                currentBase = bottomOverlay; // Now the overlay is the "Top" of the bottom pile
+                IntPtr hMonitor = Win32.MonitorFromWindow(pin, Win32.MONITOR_DEFAULTTONEAREST);
+                if (!monitorGroups.ContainsKey(hMonitor))
+                    monitorGroups[hMonitor] = new List<IntPtr>();
+                monitorGroups[hMonitor].Add(pin);
             }
 
-            // Now iterate upwards
-            for (int i = _pinnedStack.Count - 2; i >= 0; i--)
+            // 3. Build the Zipper per monitor from Bottom Up
+            foreach (var group in monitorGroups.Values)
             {
-                IntPtr nextUpPin = _pinnedStack[i];
-                
-                // Link: Bottom Pile -> Owns -> Next Window Up
-                Win32.SetWindowLong(nextUpPin, Win32.GWLP_HWNDPARENT, currentBase);
-                currentBase = nextUpPin;
+                if (group.Count == 0) continue;
 
-                // Link: Next Window Up -> Owns -> Its Overlay
-                if (_overlayMap.TryGetValue(nextUpPin, out var overlay))
+                // Monitor-local stack top
+                IntPtr currentBase = group[group.Count - 1]; // Bottom Pin for this monitor
+
+                if (_overlayMap.TryGetValue(currentBase, out var bottomOverlay))
                 {
-                    Win32.SetWindowLong(overlay, Win32.GWLP_HWNDPARENT, currentBase);
-                    currentBase = overlay;
+                    Win32.SetWindowLong(bottomOverlay, Win32.GWLP_HWNDPARENT, currentBase);
+                    currentBase = bottomOverlay;
+                }
+
+                for (int i = group.Count - 2; i >= 0; i--)
+                {
+                    IntPtr nextUpPin = group[i];
+                    Win32.SetWindowLong(nextUpPin, Win32.GWLP_HWNDPARENT, currentBase);
+                    currentBase = nextUpPin;
+
+                    if (_overlayMap.TryGetValue(nextUpPin, out var overlay))
+                    {
+                        Win32.SetWindowLong(overlay, Win32.GWLP_HWNDPARENT, currentBase);
+                        currentBase = overlay;
+                    }
                 }
             }
             
-            // 3. Set Everything to TopMost to float above normal windows
+            // 4. Set Everything to TopMost to float above normal windows
             foreach (var hwnd in _pinnedStack)
             {
                  Win32.SetWindowPos(hwnd, Win32.HWND_TOPMOST, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE | Win32.SWP_NOACTIVATE);
@@ -159,7 +140,7 @@ namespace Pinnie.Services
             EnforceStackOrder();
         }
 
-        private void UnpinWindow(IntPtr hWnd)
+        public void UnpinWindow(IntPtr hWnd)
         {
             if (_pinnedStack.Contains(hWnd))
             {
@@ -175,6 +156,14 @@ namespace Pinnie.Services
             
             // Re-chain remaining
             EnforceStackOrder();
+        }
+        private void SetOwnerIfChanged(IntPtr hwnd, IntPtr newOwner)
+        {
+            IntPtr currentOwner = Win32.GetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT);
+            if (currentOwner != newOwner)
+            {
+                Win32.SetWindowLong(hwnd, Win32.GWLP_HWNDPARENT, newOwner);
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Pinnie
         public event EventHandler<bool>? ShowPetIconToggleClicked;
         public event EventHandler<bool>? ShowBorderToggleClicked;
         public event EventHandler<bool>? StartupToggleClicked;
+        public event EventHandler<bool>? SoundToggleClicked;
         public event EventHandler? ChangeIconClicked;
         public event EventHandler<int>? IconSizeChanged;
         public event EventHandler<string>? IconPositionChanged;
@@ -25,6 +26,7 @@ namespace Pinnie
         private bool _showPetIcon = true;
         private bool _showBorder = true;
         private bool _runOnStartup = false;
+        private bool _soundEnabled = true;
         private SubMenu? _iconSizeSubMenu;
         private SubMenu? _iconPositionSubMenu;
         private SubMenu? _changeIconSubMenu; 
@@ -52,12 +54,6 @@ namespace Pinnie
             _iconSizeSubMenu.AddMenuItem("Small (30px)", "30");
             _iconSizeSubMenu.AddMenuItem("Medium (50px)", "50");
             _iconSizeSubMenu.AddMenuItem("Large (80px)", "80");
-            _iconSizeSubMenu.ItemClicked += (s, value) =>
-            {
-                IconSizeChanged?.Invoke(this, int.Parse(value));
-                HideAllSubMenus();
-            };
-
             _iconSizeSubMenu.ItemClicked += (s, value) =>
             {
                 IconSizeChanged?.Invoke(this, int.Parse(value));
@@ -149,11 +145,12 @@ namespace Pinnie
             };
         }
 
-        public void SetStates(bool showPetIcon, bool showBorder, bool runOnStartup)
+        public void SetStates(bool showPetIcon, bool showBorder, bool runOnStartup, bool soundEnabled)
         {
             _showPetIcon = showPetIcon;
             _showBorder = showBorder;
             _runOnStartup = runOnStartup;
+            _soundEnabled = soundEnabled;
             UpdateVisuals();
         }
 
@@ -167,6 +164,7 @@ namespace Pinnie
             ChkShowPetIcon.IsChecked = _showPetIcon;
             ChkShowBorder.IsChecked = _showBorder;
             ChkRunOnStartup.IsChecked = _runOnStartup;
+            ChkSoundEnabled.IsChecked = _soundEnabled;
         }
 
         private void ClickDetectionTimer_Tick(object? sender, EventArgs e)
@@ -378,6 +376,13 @@ namespace Pinnie
             _runOnStartup = !_runOnStartup;
             UpdateVisuals();
             StartupToggleClicked?.Invoke(this, _runOnStartup);
+        }
+
+        private void BtnSoundEnabled_Click(object sender, RoutedEventArgs e)
+        {
+            _soundEnabled = !_soundEnabled;
+            UpdateVisuals();
+            SoundToggleClicked?.Invoke(this, _soundEnabled);
         }
 
         private void BtnHotkey_Click(object sender, RoutedEventArgs e)

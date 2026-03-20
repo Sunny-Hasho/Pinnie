@@ -17,6 +17,7 @@ namespace Pinnie.Services
         public event EventHandler<bool>? ShowPetIconChanged;
         public event EventHandler<bool>? ShowBorderChanged;
         public event EventHandler<int>? BorderThicknessChanged;
+        public event EventHandler<bool>? SoundEnabledChanged;
         public event EventHandler<int>? BorderRadiusChanged;
         public event EventHandler<System.Windows.Media.Brush>? BorderColorChanged;
         public event EventHandler<string>? PetIconChanged;
@@ -25,6 +26,7 @@ namespace Pinnie.Services
         
         public bool ShowPetIcon { get; set; } = true;
         public bool ShowBorder { get; set; } = true;
+        public bool SoundEnabled { get; set; } = true;
         
         private const string AppName = "Pinnie";
 
@@ -32,7 +34,7 @@ namespace Pinnie.Services
         {
             _trayMenu = new TrayMenu();
             bool isStartup = CheckStartup();
-            _trayMenu.SetStates(ShowPetIcon, ShowBorder, isStartup);
+            _trayMenu.SetStates(ShowPetIcon, ShowBorder, isStartup, SoundEnabled);
             
             // Wire up events
             _trayMenu.ShowPetIconToggleClicked += (s, enabled) =>
@@ -45,6 +47,12 @@ namespace Pinnie.Services
             {
                 ShowBorder = enabled;
                 ShowBorderChanged?.Invoke(this, enabled);
+            };
+
+            _trayMenu.SoundToggleClicked += (s, enabled) =>
+            {
+                SoundEnabled = enabled;
+                SoundEnabledChanged?.Invoke(this, enabled);
             };
             
             _trayMenu.StartupToggleClicked += (s, enabled) => SetStartup(enabled);
@@ -141,7 +149,7 @@ namespace Pinnie.Services
                 if (_trayMenu != null && !_trayMenu.IsVisible)
                 {
                     bool isStartup = CheckStartup();
-                    _trayMenu.SetStates(ShowPetIcon, ShowBorder, isStartup);
+                    _trayMenu.SetStates(ShowPetIcon, ShowBorder, isStartup, SoundEnabled);
                     _trayMenu.ShowAtMouse();
                 }
             }

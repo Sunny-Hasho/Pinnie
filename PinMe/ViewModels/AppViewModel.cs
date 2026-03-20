@@ -32,6 +32,7 @@ namespace Pinnie.ViewModels
             // Set TrayService properties from loaded settings before initialization
             _trayService.ShowPetIcon = _settingsService.CurrentSettings.ShowPetIcon;
             _trayService.ShowBorder = _settingsService.CurrentSettings.ShowBorder;
+            _trayService.SoundEnabled = _settingsService.CurrentSettings.SoundEnabled;
 
             // Initialize Focus Debounce Timer
             _focusDebounceTimer = new System.Windows.Threading.DispatcherTimer();
@@ -74,6 +75,12 @@ namespace Pinnie.ViewModels
                 _settingsService.CurrentSettings.ShowBorder = enabled;
                 _settingsService.Save();
             };
+            _trayService.SoundEnabledChanged += (s, enabled) =>
+            {
+                _soundService.IsMuted = !enabled;
+                _settingsService.CurrentSettings.SoundEnabled = enabled;
+                _settingsService.Save();
+            };
             _trayService.BorderThicknessChanged += (s, thickness) => 
             {
                 _overlayService.SetBorderThickness(thickness);
@@ -113,6 +120,13 @@ namespace Pinnie.ViewModels
                 _overlayService.SetPetIconPosition(position);
                 _settingsService.CurrentSettings.PetIconPosition = position;
                 _settingsService.Save();
+            };
+
+            _overlayService.TargetWindowClosed += (s, hwnd) => 
+            {
+                Logger.Log($"AppViewModel: Window {hwnd} closed. Cleaning up pinning state.");
+                _pinService.UnpinWindow(hwnd);
+                _pinService.UnregisterOverlay(hwnd);
             };
 
             _hotkeyService.HotkeyPressed += (s, e) => ToggleActiveWindowPin();
@@ -181,6 +195,9 @@ namespace Pinnie.ViewModels
             _overlayService.SetBorderThickness(settings.BorderThickness);
             _overlayService.SetCornerRadius(settings.BorderRadius);
             
+            // Apply sound setting
+            _soundService.IsMuted = !settings.SoundEnabled;
+            
             // Convert hex string to Brush for border color
             try
             {
@@ -230,6 +247,7 @@ namespace Pinnie.ViewModels
             // Update tray service state
             _trayService.ShowPetIcon = settings.ShowPetIcon;
             _trayService.ShowBorder = settings.ShowBorder;
+            _trayService.SoundEnabled = settings.SoundEnabled;
         }
 
         public void UpdateHotkey(uint modifiers, uint key)
