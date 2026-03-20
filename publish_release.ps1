@@ -16,7 +16,7 @@ Write-Host "Building Portable Version (Self-Contained)..." -ForegroundColor Cyan
 
 # 2. Lightweight Version (Framework-Dependent, Requires .NET 8)
 Write-Host "Building Lightweight Version (Framework-Dependent)..." -ForegroundColor Cyan
-& dotnet publish $projectPath -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishTrimmed=false -o "$outputDir/Lightweight"
+& dotnet publish $projectPath -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true -p:PublishTrimmed=false -p:SelfContained=false -o "$outputDir/Lightweight"
 
 Write-Host "Build Complete!" -ForegroundColor Green
 Write-Host "Artifacts are in $outputDir" -ForegroundColor Green

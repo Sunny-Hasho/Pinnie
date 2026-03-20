@@ -28,7 +28,7 @@ jobs:
       run: dotnet publish PinMe/Pinnie.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=false -o publish/Portable
 
     - name: Publish Lightweight (Framework-Dependent)
-      run: dotnet publish PinMe/Pinnie.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishTrimmed=false -o publish/Lightweight
+      run: dotnet publish PinMe/Pinnie.csproj -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true -p:PublishTrimmed=false -p:SelfContained=false -o publish/Lightweight
 
     - name: Upload Portable Artifact
       uses: actions/upload-artifact@v4
