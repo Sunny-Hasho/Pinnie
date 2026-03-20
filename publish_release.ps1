@@ -1,8 +1,8 @@
 # Publish Release Script for Pinnie
 
 
-$projectPath = "./PinMe/Pinnie.csproj" 
-$outputDir = "./Releases"
+$projectPath = Join-Path $PSScriptRoot "PinMe\Pinnie.csproj"
+$outputDir = Join-Path $PSScriptRoot "Releases"
 
 # Clean previous releases
 if (Test-Path $outputDir) {
