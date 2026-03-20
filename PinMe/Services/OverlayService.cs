@@ -118,7 +118,7 @@ namespace Pinnie.Services
             return false;
         }
 
-        private void TrackingTimer_Tick(object sender, EventArgs e)
+        private void TrackingTimer_Tick(object? sender, EventArgs e)
         {
              var keys = _overlays.Keys.ToList();
              foreach (var hwnd in keys)

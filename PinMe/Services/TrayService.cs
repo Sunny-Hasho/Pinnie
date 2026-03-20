@@ -10,8 +10,6 @@ namespace Pinnie.Services
         private NotifyIcon? _notifyIcon;
         private TrayMenu? _trayMenu;
         
-        public event EventHandler<IntPtr>? PinWindowRequested;
-        public event EventHandler? UnpinRequested; 
         public event EventHandler<HotkeySubMenu.HotkeyEventArgs>? HotkeyChanged;
         public event EventHandler? ExitRequested;
         public event EventHandler<bool>? ShowPetIconChanged;

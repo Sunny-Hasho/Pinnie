@@ -63,7 +63,7 @@ namespace Pinnie.ViewModels
                 UpdateHotkey(e.Modifiers, e.Key);
             };
 
-            _trayService.PinWindowRequested += (s, hwnd) => TogglePinState(hwnd); 
+
             _trayService.ShowPetIconChanged += (s, enabled) => 
             {
                 _overlayService.SetPetIconState(enabled);
@@ -151,7 +151,7 @@ namespace Pinnie.ViewModels
             }
         }
 
-        private void FocusDebounceTimer_Tick(object sender, EventArgs e)
+        private void FocusDebounceTimer_Tick(object? sender, EventArgs e)
         {
             _focusDebounceTimer.Stop();
             
@@ -214,7 +214,7 @@ namespace Pinnie.ViewModels
             
             // Apply pet icon settings
             string defaultPath = "pack://application:,,,/Assets/capy.gif";
-            string iconPath = settings.PetIconPath;
+            string? iconPath = settings.PetIconPath;
 
             if (!string.IsNullOrEmpty(iconPath))
             {

@@ -11,7 +11,6 @@ namespace Pinnie
         public event EventHandler<bool>? ShowBorderToggleClicked;
         public event EventHandler<bool>? StartupToggleClicked;
         public event EventHandler<bool>? SoundToggleClicked;
-        public event EventHandler? ChangeIconClicked;
         public event EventHandler<int>? IconSizeChanged;
         public event EventHandler<string>? IconPositionChanged;
         public event EventHandler<int>? BorderThicknessChanged;

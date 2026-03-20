@@ -7,7 +7,7 @@ namespace Pinnie.Services
     public class HotkeyService
     {
         private const int ID_HOTKEY = 9000;
-        public event EventHandler HotkeyPressed;
+        public event EventHandler? HotkeyPressed;
 
         public bool Register(IntPtr hWnd, uint modifiers, uint key)
         {

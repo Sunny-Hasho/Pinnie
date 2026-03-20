@@ -45,7 +45,7 @@ namespace Pinnie
             if (msg == Win32.WM_GETMINMAXINFO)
             {
                 // Marshal the MINMAXINFO structure
-                Win32.MINMAXINFO mmi = (Win32.MINMAXINFO)System.Runtime.InteropServices.Marshal.PtrToStructure(lParam, typeof(Win32.MINMAXINFO));
+                Win32.MINMAXINFO mmi = System.Runtime.InteropServices.Marshal.PtrToStructure<Win32.MINMAXINFO>(lParam);
 
                 // Adjust the maximizing size and position
                 // Set to extremely large values to prevent clamping on high-res monitors

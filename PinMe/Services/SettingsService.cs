@@ -30,7 +30,7 @@ namespace Pinnie.Services
     public class SettingsService
     {
         private readonly string _settingsPath;
-        public AppSettings CurrentSettings { get; private set; }
+        public AppSettings CurrentSettings { get; private set; } = new AppSettings();
 
         public SettingsService()
         {
