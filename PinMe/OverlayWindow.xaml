@@ -17,7 +17,7 @@
         xmlns:gif="http://wpfanimatedgif.codeplex.com">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition x:Name="HeaderRow" Height="150" />
+            <RowDefinition x:Name="HeaderRow" Height="80" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 

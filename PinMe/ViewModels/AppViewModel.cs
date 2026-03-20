@@ -22,6 +22,7 @@ namespace Pinnie.ViewModels
 
         public AppViewModel()
         {
+            Logger.Log($"AppViewModel: Initializing. RunAsAdmin: {Win32.IsRunAsAdmin()}");
             _settingsService = new SettingsService(); // Load settings first
             _pinService = new WindowPinService();
             _hotkeyService = new HotkeyService();

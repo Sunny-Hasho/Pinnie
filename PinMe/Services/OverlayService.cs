@@ -333,15 +333,29 @@ namespace Pinnie.Services
             // ROBUST OFFSET CALCULATION
             // We need to offset the window up by the physical height of the header row.
             
+            // Get DPI scale factor for the target window's monitor
+            // This is more robust than GetDpiForWindow when running elevated
+            double targetScale = 1.0;
+            IntPtr hMonitor = Win32.MonitorFromWindow(hwnd, 0); // MONITOR_DEFAULTTONULL
+            if (hMonitor != IntPtr.Zero)
+            {
+                if (Win32.GetDpiForMonitor(hMonitor, Win32.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY) == 0)
+                {
+                    targetScale = dpiX / 96.0;
+                }
+            }
+            else 
+            {
+                // Fallback to simpler window-level check
+                int dpiVal = Win32.GetDpiForWindow(hwnd);
+                if (dpiVal > 0) targetScale = dpiVal / 96.0;
+            }
+
             int petOffset = 0;
             try 
             {
-                // Synchronize DPI with the target window immediately to prevent "jumps" on multiple monitors
-                int targetDpiVal = Win32.GetDpiForWindow(hwnd);
-                if (targetDpiVal == 0) targetDpiVal = 96;
-                double targetScale = targetDpiVal / 96.0;
                 var targetDpi = new System.Windows.DpiScale(targetScale, targetScale);
-
+                
                 // Try to get exact rendered height from WPF (using target DPI)
                 double actualHeight = overlay.GetActualHeaderHeight(targetDpi);
                 if (actualHeight > 0)
@@ -358,56 +372,50 @@ namespace Pinnie.Services
             // Fallback: If we expect a Fixed Header but got 0/bad value
             if (useFixedHeader && petOffset <= 0)
             {
-                 int dpi = Win32.GetDpiForWindow(hwnd);
-                 if (dpi == 0) dpi = 96;
-                 double scale = dpi / 96.0;
-                 petOffset = (int)Math.Ceiling(150 * scale);
-                 
-                 // Safety clamp for restored windows
-                 if (petOffset < 150) petOffset = 150;
+                 // Use a default based on the new 80 DIP header
+                 petOffset = (int)Math.Ceiling(80 * targetScale);
             }
-            
+                 
+            // Post-process positioning (UNCONDITIONAL)
             finalTop -= petOffset;
             finalHeight += petOffset;
 
-            // showPet passed to SetPetVisible handles the icon visibility itself
-            // relying on SetHeaderHeight(0) handles the structural space
-            {
-                // Pet visibility is already set via SetPetVisible above
-            }
+            // 1. Position (Win32 Physical)
+            // Use SWP_SHOWWINDOW only once (while hidden) to trigger first paint, 
+            // then only use MOVE/SIZE flags to avoid fighting with OS layout.
+            uint swpFlags = Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE;
+            if (overlay.Opacity < 0.1) swpFlags |= Win32.SWP_SHOWWINDOW;
 
-            // Position (Win32 Physical)
             Win32.SetWindowPos(overlay.Handle, IntPtr.Zero, 
                 rect.Left, finalTop, width, finalHeight, 
-                Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE | Win32.SWP_SHOWWINDOW);
+                swpFlags);
 
-            // SYNC WPF PROPERTIES (Logical Units)
-            // This prevents WPF from "snapping" back to default 300x300 sizes during frames where
-            // it might ignore Win32-only positioning.
-            try 
+            // 2. SYNC WPF PROPERTIES (Logical Units) - ONLY DURING INITIALIZATION
+            // This prevents WPF from "snapping" during the first few frames.
+            if (overlay.StabilityTicks < 2)
             {
-                int currentDpiVal = Win32.GetDpiForWindow(hwnd);
-                if (currentDpiVal == 0) currentDpiVal = 96;
-                double currentScale = currentDpiVal / 96.0;
-
-                // Update properties in logical units
-                if (overlay.WindowStartupLocation != System.Windows.WindowStartupLocation.Manual)
-                    overlay.WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
-
-                overlay.Left = rect.Left / currentScale;
-                overlay.Top = finalTop / currentScale;
-                overlay.Width = width / currentScale;
-                overlay.Height = finalHeight / currentScale;
-
-                // REVEAL ONLY AFTER STABLE (usually ~20ms / 2 ticks)
-                // This hides the initial "jump" frame on secondary monitors.
-                overlay.StabilityTicks++;
-                if (overlay.StabilityTicks >= 3 && overlay.Opacity < 1.0)
+                try 
                 {
-                    overlay.Opacity = 1.0;
+                    if (overlay.WindowStartupLocation != System.Windows.WindowStartupLocation.Manual)
+                        overlay.WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+
+                    overlay.Left = rect.Left / targetScale;
+                    overlay.Top = finalTop / targetScale;
+                    overlay.Width = width / targetScale;
+                    overlay.Height = finalHeight / targetScale;
+                }
+                catch 
+                {
+                    // Ignore transient errors
                 }
             }
-            catch { }
+
+            // 3. REVEAL ONLY AFTER STABLE (usually ~20ms / 2 ticks)
+            overlay.StabilityTicks++;
+            if (overlay.StabilityTicks >= 3 && overlay.Opacity < 1.0)
+            {
+                overlay.Opacity = 1.0;
+            }
         }
 
         private void AnimationEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)

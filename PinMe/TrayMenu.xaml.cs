@@ -40,6 +40,7 @@ namespace Pinnie
         public TrayMenu()
         {
             InitializeComponent();
+            
             _clickDetectionTimer = new System.Windows.Threading.DispatcherTimer();
             _clickDetectionTimer.Interval = TimeSpan.FromMilliseconds(50);
             _clickDetectionTimer.Tick += ClickDetectionTimer_Tick;

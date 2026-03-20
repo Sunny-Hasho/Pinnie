@@ -162,7 +162,17 @@ namespace Pinnie.Services
             IntPtr currentOwner = Win32.GetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT);
             if (currentOwner != newOwner)
             {
-                Win32.SetWindowLong(hwnd, Win32.GWLP_HWNDPARENT, newOwner);
+                IntPtr result = Win32.SetWindowLong(hwnd, Win32.GWLP_HWNDPARENT, newOwner);
+                if (result == IntPtr.Zero && System.Runtime.InteropServices.Marshal.GetLastWin32Error() != 0)
+                {
+                    int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    Logger.Log($"SetOwnerIfChanged Failed: HWND {hwnd}, Owner {newOwner}, Error {error}");
+                    
+                    if (error == 5) // Access Denied
+                    {
+                        Logger.Log("ACCESS DENIED: Pinnie might need Administrator privileges to manage this window.");
+                    }
+                }
             }
         }
     }
