@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 using Pinnie.Interop;
-using Microsoft.Win32;
+using Microsoft.Win32.TaskScheduler;
 
 namespace Pinnie.Services
 {
@@ -97,46 +97,59 @@ namespace Pinnie.Services
 
         private bool CheckStartup()
         {
+            // Query Task Scheduler COM API directly — no external processes.
             try
             {
-                using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false))
-                {
-                    return key != null && key.GetValue(AppName) != null;
-                }
+                using var ts = new TaskService();
+                return ts.GetTask(AppName) != null;
             }
             catch { return false; }
         }
 
         public void SetStartup(bool enable)
         {
+            // Use Task Scheduler COM API:
+            //   - No PowerShell, no schtasks.exe, no antivirus flags
+            //   - LogonType = InteractiveToken  → only runs for the logged-in user
+            //   - RunLevel  = Highest           → elevated (admin) with no UAC prompt
             try
             {
-                using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true))
-                {
-                    if (key == null) return;
+                using var ts = new TaskService();
 
-                    if (enable)
-                    {
-                        var path = System.Environment.ProcessPath;
-                        if (!string.IsNullOrEmpty(path))
-                        {
-                            // Ensure path is quoted if it contains spaces
-                            if (!path.StartsWith("\"") && path.Contains(" "))
-                            {
-                                path = $"\"{path}\"";
-                            }
-                            key.SetValue(AppName, path);
-                        }
-                    }
-                    else
-                    {
-                        key.DeleteValue(AppName, false);
-                    }
+                if (enable)
+                {
+                    var exePath = System.Environment.ProcessPath;
+                    if (string.IsNullOrEmpty(exePath)) return;
+
+                    TaskDefinition td = ts.NewTask();
+                    td.RegistrationInfo.Description = "Starts Pinnie at user logon with administrator privileges.";
+
+                    // Who runs it and at what privilege level
+                    td.Principal.UserId    = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+                    td.Principal.LogonType = TaskLogonType.InteractiveToken; // current interactive user only
+                    td.Principal.RunLevel  = TaskRunLevel.Highest;           // elevated — no UAC popup
+
+                    // When to run
+                    td.Triggers.Add(new LogonTrigger());
+
+                    // What to run
+                    td.Actions.Add(new ExecAction(exePath));
+
+                    // Misc settings
+                    td.Settings.StopIfGoingOnBatteries      = false;
+                    td.Settings.DisallowStartIfOnBatteries  = false;
+                    td.Settings.ExecutionTimeLimit           = TimeSpan.Zero; // no timeout
+
+                    ts.RootFolder.RegisterTaskDefinition(AppName, td);
+                }
+                else
+                {
+                    ts.RootFolder.DeleteTask(AppName, exceptionOnNotExists: false);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error settings startup: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error setting startup: {ex.Message}");
             }
         }
 
