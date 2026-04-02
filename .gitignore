@@ -44,3 +44,5 @@ Desktop.ini
 project.lock.json
 project.fragment.lock.json
 artifacts/
+
+/PinMe/publish_test/

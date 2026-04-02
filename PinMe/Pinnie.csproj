@@ -17,6 +17,10 @@
     <RepositoryUrl>https://github.com/your-username/PinMe</RepositoryUrl>
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
     <Win32Icon>app_icon.ico</Win32Icon>
+    
+    <!-- Disable PDB/Debug symbols for cleaner Release builds -->
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
